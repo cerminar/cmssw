@@ -26,6 +26,7 @@
 #include "CondFormats/DTObjects/interface/DTCCBConfig.h"
 #include "CondFormats/DTObjects/interface/DTKeyedConfig.h"
 #include "CondFormats/DTObjects/interface/DTTPGParameters.h"
+#include "CondFormats/DTObjects/interface/DTRecoUncertainties.h"
 
 namespace {
   struct dictionary {
@@ -73,6 +74,10 @@ namespace {
 //    std::vector< std::pair<DTTtrigId,DTTtrigData> > blah3;
 //    std::vector< std::pair<DTMtimeId,DTMtimeData> > blah4;
 //    std::vector< std::pair<DTStatusFlagId,DTStatusFlagData> > blah5;
+
+    std::map<uint32_t, std::vector<float> > payload;
+
+
   };
 }
 
