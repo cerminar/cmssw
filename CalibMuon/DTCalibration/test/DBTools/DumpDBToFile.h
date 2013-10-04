@@ -23,6 +23,7 @@ class DTStatusFlag;
 class DTDeadFlag;
 class DTCalibrationMap;
 class DTReadOutMapping;
+class DTRecoUncertainties;
 
 class DumpDBToFile : public edm::EDAnalyzer {
 public:
@@ -48,6 +49,7 @@ private:
   const DTStatusFlag *statusMap;
   const DTDeadFlag *deadMap;
   const DTReadOutMapping *channelsMap;
+  const DTRecoUncertainties *uncertMap;
 
   DTCalibrationMap *theCalibFile;
 
