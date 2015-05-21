@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 # import the needed ingredients
 from Calibration.TkAlCaRecoProducers.AlcaBeamSpotHarvester_cff import *
 from Calibration.TkAlCaRecoProducers.AlcaSiStripQualityHarvester_cff import *
+from Alignment.CommonAlignmentProducer.AlcaSiPixelAliHarvester_cff import *
+
 from Calibration.TkAlCaRecoProducers.PCLMetadataWriter_cfi import *
 
 # commoon ingredients
@@ -85,11 +87,32 @@ ALCAHARVESTSiStripQuality_dbOutput = cms.PSet(record = cms.string('SiStripBadStr
                                              timetype   = cms.untracked.string('runnumber'))
 
 
+    #
+ALCAHARVESTSiPixelAli_metadata = cms.PSet(record              = cms.untracked.string('TrackerAlignmentRcd'),
+#                                               destDB              = cms.untracked.string("oracle://cms_orcon_prod/CMS_COND_31X_STRIP"),
+#                                               destDBValidation    = cms.untracked.string("oracle://cms_orcoff_prep/CMS_COND_STRIP"),
+#                                               tag                 = cms.untracked.string("SiStripBadChannel_PCL_v0_offline"),
+#                                               Timetype            = cms.untracked.string("runnumber"),
+#                                               IOVCheck            = cms.untracked.string("All"),
+#                                               DuplicateTagHLT     = cms.untracked.string("SiStripBadChannel_PCL_v0_hlt"),
+#                                               DuplicateTagEXPRESS = cms.untracked.string(""),
+#                                               DuplicateTagPROMPT  = cms.untracked.string("SiStripBadChannel_PCL_v0_prompt"),
+                                              )
+
+
+ALCAHARVESTSiPixelAli_dbOutput = cms.PSet(record = cms.string('TrackerAlignmentRcd'),
+                                          tag = cms.string('SiPixelAli_pcl'),
+                                          timetype   = cms.untracked.string('runnumber'))
+
+
+
+
 # define the paths
 
 BeamSpotByRun = cms.Path(ALCAHARVESTBeamSpotByRun)
 BeamSpotByLumi = cms.Path(ALCAHARVESTBeamSpotByLumi)
 SiStripQuality = cms.Path(ALCAHARVESTSiStripQuality)
+SiPixelAli     = cms.Path(ALCAHARVESTSiPixelAli)
 
 ALCAHARVESTDQMSaveAndMetadataWriter = cms.Path(dqmSaver+pclMetadataWriter)
 
