@@ -1,11 +1,10 @@
-/// \file PCLTrackerAlProducer.cc
-///
-///  \author    : Frederic Ronga
-///  Revision   : $Revision: 1.68 $
-///  last update: $Date: 2012/08/10 09:25:23 $
-///  by         : $Author: flucke $
-
-// TODO: Update Doxygen description
+/**
+ * @package   Alignment/CommonAlignmentProducer
+ * @file      PCLTrackerAlProducer.cc
+ *
+ * @author    Max Stark (max.stark@cern.ch)
+ * @date      2015/07/16
+ */
 
 
 
@@ -13,12 +12,12 @@
 #include "PCLTrackerAlProducer.h"
 
 /*** Core framework functionality ***/
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ESTransientHandle.h"
 #include "FWCore/Framework/interface/Run.h"
+
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Utilities/interface/Parse.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -40,7 +39,6 @@
 
 /*** Geometry ***/
 #include "Geometry/TrackingGeometryAligner/interface/GeometryAligner.h"
-
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeomBuilderFromGeometricDet.h"
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
@@ -50,42 +48,6 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "Geometry/Records/interface/MuonNumberingRecord.h"
-
-/*** Logging ***/
-#define CLASS_NAME typeid(*this).name()
-#define FUNC_NAME  __FUNCTION__
-
-template <typename T>
-void buildMessage(std::ostream& oss, T t)
-{
-  oss << t;
-}
-
-template<typename T, typename... Args>
-void buildMessage(std::ostream& oss, T t, Args... args)
-{
-  buildMessage(oss, t);
-  buildMessage(oss, args...);
-}
-
-template<typename... Args>
-void PRINT_INFO(std::string className, std::string funcName, Args... args)
-{
-  //std::string className = "PCLTrackerAlProducer";
-
-  std::ostringstream oss;
-  buildMessage(oss, args...);
-
-  edm::LogInfo("Alignment") << "@SUB=" << className.c_str() << "::"
-                            << funcName.c_str() << ": "
-                            << oss.str() << std::endl;
-  printf("%s::%s: %s\n", className.c_str(),
-                         funcName.c_str(),
-                         oss.str().c_str());
-}
-
-//TODO: void PRINT_WARNING()
-//TODO: void PRINT_ERROR()
 
 
 
@@ -121,8 +83,6 @@ PCLTrackerAlProducer
   tkLasBeamTag_            (config.getParameter<edm::InputTag>("tkLasBeamTag")),
   clusterValueMapTag_      (config.getParameter<edm::InputTag>("hitPrescaleMapTag"))
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   createAlignmentAlgorithm(config);
   createCalibrations      (config);
   createMonitors          (config);
@@ -132,8 +92,6 @@ PCLTrackerAlProducer
 PCLTrackerAlProducer
 ::~PCLTrackerAlProducer()
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   delete theAlignmentAlgo;
 
   for (auto iCal  = theCalibrations.begin();
@@ -141,6 +99,7 @@ PCLTrackerAlProducer
           ++iCal) {
     delete *iCal;
   }
+
   // TODO: Delete monitors as well?
 
   delete theAlignmentParameterStore;
@@ -152,16 +111,14 @@ PCLTrackerAlProducer
 
 
 
-/******************************************************************************
- *** INTERFACE IMPLEMENTATION                                               ***
- ******************************************************************************/
+//=============================================================================
+//===   INTERFACE IMPLEMENTATION                                            ===
+//=============================================================================
 
 //_____________________________________________________________________________
 void PCLTrackerAlProducer
 ::beginJob()
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   nevent_ = 0;
 
   for (auto iCal  = theCalibrations.begin();
@@ -185,8 +142,6 @@ void PCLTrackerAlProducer
 void PCLTrackerAlProducer
 ::endJob()
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called, events processed: ", nevent_);
-
   finish();
 
   for (auto monitor  = theMonitors.begin();
@@ -206,23 +161,20 @@ void PCLTrackerAlProducer
 void PCLTrackerAlProducer
 ::beginRun(const edm::Run& run, const edm::EventSetup& setup)
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-  // Do not forward edm::Run
-  theAlignmentAlgo->beginRun(setup);
-
   if (setupChanged(setup)) {
+    edm::LogInfo("Alignment") << "@SUB=PCLTrackerAlProducer::beginRun"
+                              << "EventSetup-Record changed.";
     initAlignmentAlgorithm(setup);
   }
 
-
+  // Do not forward edm::Run
+  theAlignmentAlgo->beginRun(setup);
 }
 
 //_____________________________________________________________________________
 void PCLTrackerAlProducer
 ::endRun(const edm::Run& run, const edm::EventSetup& setup)
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   // TODO: Either MP nor HIP is implementing the endRun() method... so this
   //       seems to be useless?
 
@@ -246,7 +198,6 @@ void PCLTrackerAlProducer
 ::beginLuminosityBlock(const edm::LuminosityBlock& lumiBlock,
                        const edm::EventSetup&      setup)
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
   // Do not forward edm::LuminosityBlock
   theAlignmentAlgo->beginLuminosityBlock(setup);
 }
@@ -256,7 +207,6 @@ void PCLTrackerAlProducer
 ::endLuminosityBlock(const edm::LuminosityBlock& lumiBlock,
                      const edm::EventSetup&      setup)
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
   // Do not forward edm::LuminosityBlock
   theAlignmentAlgo->endLuminosityBlock(setup);
 }
@@ -265,14 +215,6 @@ void PCLTrackerAlProducer
 void PCLTrackerAlProducer
 ::analyze(const edm::Event& event, const edm::EventSetup& setup)
 {
-  ++nevent_;
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called, event number: ", nevent_);
-
-  if (setupChanged(setup)) {
-    initAlignmentAlgorithm(setup);
-    initBeamSpot(event);
-  }
-
   if (!theAlignmentAlgo->processesEvents()) {
     edm::LogWarning("BadConfig") << "@SUB=PCLTrackerAlProducer::analyze"
                                  << "Skipping event. The current configuration "
@@ -280,6 +222,18 @@ void PCLTrackerAlProducer
                                  << "to process any events.";
     return;
   }
+
+  if (setupChanged(setup)) {
+    edm::LogInfo("Alignment") << "@SUB=PCLTrackerAlProducer::analyze"
+                              << "EventSetup-Record changed.";
+    initAlignmentAlgorithm(setup);
+  }
+
+  if (nevent_== 0 && theExtraAlignables) {
+    initBeamSpot(event);
+  }
+
+  ++nevent_;
 
   // reading in survey records
   readInSurveyRcds(setup);
@@ -327,9 +281,9 @@ void PCLTrackerAlProducer
 
 
 
-/******************************************************************************
- *** PRIVATE METHOD IMPLEMENTATION                                          ***
- ******************************************************************************/
+//=============================================================================
+//===   PRIVATE METHOD IMPLEMENTATION                                       ===
+//=============================================================================
 
 /*** Code which is independent of Event & Setup
      Called from constructor ***/
@@ -416,41 +370,42 @@ bool PCLTrackerAlProducer
 {
   bool changed = false;
 
+  if (watchIdealGeometryRcd.check(setup)) {
+    changed = true;
+  }
+
+  if (watchGlobalPositionRcd.check(setup)) {
+    changed = true;
+  }
+
   if (doTracker_) {
     if (watchTrackerAlRcd.check(setup)) {
-        PRINT_INFO(CLASS_NAME, FUNC_NAME, "TrackerAlignmentRcd has changed");
         changed = true;
-      }
+    }
 
-      if (watchTrackerAlErrorExtRcd.check(setup)) {
-        PRINT_INFO(CLASS_NAME, FUNC_NAME, "TrackerAlignmentErrorExtendedRcd has changed");
-        changed = true;
-      }
+    if (watchTrackerAlErrorExtRcd.check(setup)) {
+      changed = true;
+    }
 
-      if (watchTrackerSurDeRcd.check(setup)) {
-        PRINT_INFO(CLASS_NAME, FUNC_NAME, "TrackerSurfaceDeformationRcd has changed");
-        changed = true;
-      }
+    if (watchTrackerSurDeRcd.check(setup)) {
+      changed = true;
+    }
   }
 
   if (doMuon_) {
     if (watchDTAlRcd.check(setup)) {
-      PRINT_INFO(CLASS_NAME, FUNC_NAME, "DTAlignmentRcd has changed");
       changed = true;
     }
 
     if (watchDTAlErrExtRcd.check(setup)) {
-      PRINT_INFO(CLASS_NAME, FUNC_NAME, "DTAlignmentErrorExtendedRcd has changed");
       changed = true;
     }
 
     if (watchCSCAlRcd.check(setup)) {
-      PRINT_INFO(CLASS_NAME, FUNC_NAME, "CSCAlignmentRcd has changed");
       changed = true;
     }
 
     if (watchCSCAlErrExtRcd.check(setup)) {
-      PRINT_INFO(CLASS_NAME, FUNC_NAME, "CSCAlignmentErrorExtendedRcd has changed");
       changed = true;
     }
   }
@@ -467,8 +422,6 @@ bool PCLTrackerAlProducer
 void PCLTrackerAlProducer
 ::initAlignmentAlgorithm(const edm::EventSetup& setup)
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   // Retrieve tracker topology from geometry
   edm::ESHandle<TrackerTopology> tTopoHandle;
   setup.get<IdealGeometryRecord>().get(tTopoHandle);
@@ -483,7 +436,10 @@ void PCLTrackerAlProducer
   buildParameterStore();
   applyMisalignment();
 
-  // Initialize alignment algorithm and integrated calibration and pass the latter to algorithm
+  // Initialize alignment algorithm and integrated calibration and pass the
+  // latter to algorithm
+  edm::LogInfo("Alignment") << "@SUB=PCLTrackerAlProducer::initAlignmentAlgorithm"
+                            << "Initializing alignment algorithm.";
   theAlignmentAlgo->initialize(setup,
                                theTrackerAlignables,
                                theMuonAlignables,
@@ -550,9 +506,10 @@ void PCLTrackerAlProducer
   if (applyDbAlignment_) {
     // we need GlobalPositionRcd - and have to keep track for later removal
     // before writing again to DB...
-    edm::ESHandle<Alignments> globalPositionRcd;
-    setup.get<GlobalPositionRcd>().get(globalPositionRcd);
-    globalPositions_ = new Alignments(*globalPositionRcd);
+
+    edm::ESHandle<Alignments> globalAlignments;
+    setup.get<GlobalPositionRcd>().get(globalAlignments);
+    globalPositions_ = new Alignments(*globalAlignments);
 
     if (doTracker_) {
       applyDB<TrackerGeometry,
@@ -739,6 +696,7 @@ void PCLTrackerAlProducer
         const align::RotationType mrot = align::toMatrix(r);
         if (local) ali->rotateInLocalFrame(mrot);
         else       ali->rotateInGlobalFrame(mrot);
+
         //ali->addAlignmentPositionErrorFromRotation(mrot);
       }
     }
@@ -877,7 +835,7 @@ void PCLTrackerAlProducer
 void PCLTrackerAlProducer
 ::readInSurveyRcds(const edm::EventSetup& setup)
 {
-/*
+
   // Get Survey Rcds and add Survey Info
   if (doTracker_ && useSurvey_) {
     bool tkSurveyBool    = watchTkSurveyRcd.check(setup);
@@ -903,9 +861,9 @@ void PCLTrackerAlProducer
     bool CSCSurveyBool    = watchTkSurveyRcd.check(setup);
     bool CSCSurveyErrBool = watchTkSurveyErrExtRcd.check(setup);
 
-    if (DTSurveyBool || DTSurveyErrBool || CSCSurveyBool || CSCSurveyErrBool){
+    if (DTSurveyBool || DTSurveyErrBool || CSCSurveyBool || CSCSurveyErrBool) {
       edm::ESHandle<Alignments>   dtSurveys;
-      edm::ESHandle<SurveyError>  dtSurveyErrors;
+      edm::ESHandle<SurveyErrors>  dtSurveyErrors;
       edm::ESHandle<Alignments>   cscSurveys;
       edm::ESHandle<SurveyErrors> cscSurveyErrors;
       setup.get<DTSurveyRcd>().              get(dtSurveys);
@@ -936,7 +894,7 @@ void PCLTrackerAlProducer
       }
     }
   }
-*/
+
 }
 
 //_____________________________________________________________________________
@@ -973,24 +931,6 @@ void PCLTrackerAlProducer
   ++theSurveyIndex;
 }
 
-/* TODO: One method for applying alignments to a given geometry?
- *
-template<typename Geometry>
-void PCLTrackerAlProducer::applyAlignmentsToGeometry2(Geometry* geometry,
-                                                     Alignments* al,
-                                                     AlignmentErrors* alErrs,
-                                                     AlignTransform& globalCoordinates) {
-  GeometryAligner aligner;
-
-  aligner.applyAlignments<Geometry>(
-      geometry,
-      al,
-      alErrs,
-      globalCoordinates
-  );
-}
-*/
-
 
 
 /*** Code for writing results to database
@@ -1000,9 +940,6 @@ void PCLTrackerAlProducer::applyAlignmentsToGeometry2(Geometry* geometry,
 void PCLTrackerAlProducer
 ::finish()
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
-  /* 1) Former: Status AlignmentProducer::endOfLoop(const edm::EventSetup& iSetup, unsigned int iLoop) */
   if (theAlignmentAlgo->processesEvents() && nevent_ == 0) {
     // beginOfJob is usually called by the framework in the first event of the first loop
     // (a hack: beginOfJob needs the EventSetup that is not well defined without an event)
@@ -1015,17 +952,10 @@ void PCLTrackerAlProducer
     return;
   }
 
-  /* !!! TODO: HACK for MillePede !!!
-     Because the pede-part of MillePede needs at least 1 Event for initializing
-     the geometry */
-  //if (nevent_ == 0) return;
-
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "terminating algorithm");
   edm::LogInfo("Alignment") << "@SUB=PCLTrackerAlProducer::finish"
                             << "Terminating algorithm.";
   theAlignmentAlgo->terminate();
 
-  /* 2) Former: void AlignmentProducer::endOfJob() */
   storeAlignmentsToDB();
 }
 
@@ -1060,7 +990,6 @@ void PCLTrackerAlProducer
 
       // Save alignments to database
       if (saveToDB_ || saveApeToDB_ || saveDeformationsToDB_) {
-        PRINT_INFO(CLASS_NAME, FUNC_NAME, "Write alignments to db-file");
         writeForRunRange((*iRunRange).first);
       }
 
@@ -1073,8 +1002,6 @@ void PCLTrackerAlProducer
         }
       }
     }
-
-
 
     if (theExtraAlignables) {
       std::ostringstream bsOutput;
@@ -1165,8 +1092,6 @@ RunRanges PCLTrackerAlProducer
 void PCLTrackerAlProducer
 ::writeForRunRange(cond::Time_t time)
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   // first tracker
   if (doTracker_) {
     const AlignTransform* trackerGlobal = 0; // will be 'removed' from constants
@@ -1226,8 +1151,6 @@ void PCLTrackerAlProducer
           const AlignTransform *globalCoordinates,
           cond::Time_t time) const
 {
-  PRINT_INFO(CLASS_NAME, FUNC_NAME, "called");
-
   Alignments*              tempAlignments      = alignments;
   AlignmentErrorsExtended* tempAlignmentErrExt = alignmentErrExt;
 
@@ -1243,8 +1166,8 @@ void PCLTrackerAlProducer
   if (globalCoordinates && // happens only if (applyDbAlignment_ == true)
       globalCoordinates->transform() != AlignTransform::Transform::Identity) {
 
-    tempAlignments      = new Alignments();               // temporary storage for
-    tempAlignmentErrExt = new AlignmentErrorsExtended();  // final alignments and errors
+    tempAlignments      = new Alignments();              // temporary storage for
+    tempAlignmentErrExt = new AlignmentErrorsExtended(); // final alignments and errors
 
     GeometryAligner aligner;
     aligner.removeGlobalTransform(alignments, alignmentErrExt,
