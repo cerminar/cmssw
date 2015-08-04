@@ -517,7 +517,8 @@ MillePedeAlignmentAlgorithm::addHitCount(const std::vector<AlignmentParameters*>
   return nHitY;
 }
 
-//____________________________________________________
+// TODO: This method does NOT match endRun() in base class! Nobody is
+//       calling this?
 void MillePedeAlignmentAlgorithm::endRun(const EventInfo &eventInfo, const EndRunInfo &runInfo,
 					 const edm::EventSetup &setup)
 {
@@ -525,6 +526,12 @@ void MillePedeAlignmentAlgorithm::endRun(const EventInfo &eventInfo, const EndRu
     // LAS beam treatment
     this->addLaserData(eventInfo, *(runInfo.tkLasBeams()), *(runInfo.tkLasBeamTsoses()));
   }
+}
+
+// Implementation of endRun that DOES get called. (Because we need it.)
+void MillePedeAlignmentAlgorithm::endRun(const EndRunInfo &runInfo, const edm::EventSetup &setup)
+{
+  theMille->flushOutputFile();
 }
 
 //____________________________________________________
