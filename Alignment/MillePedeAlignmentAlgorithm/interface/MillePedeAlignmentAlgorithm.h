@@ -86,6 +86,9 @@ class MillePedeAlignmentAlgorithm : public AlignmentAlgorithmBase
   virtual void endRun(const EventInfo&, const EndRunInfo&,
                       const edm::EventSetup&); //override;
 
+  // This one will be called:
+  virtual void endRun(const EndRunInfo &runInfo, const edm::EventSetup &setup);
+
 /*   virtual void beginLuminosityBlock(const edm::EventSetup &setup) {} */
 /*   virtual void endLuminosityBlock(const edm::EventSetup &setup) {} */
 

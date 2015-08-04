@@ -31,7 +31,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "CondFormats/Alignment/interface/AlignmentErrorsExtended.h" 
+#include "CondFormats/Alignment/interface/AlignmentErrorsExtended.h"
 #include "DataFormats/GeometrySurface/interface/GloballyPositioned.h"
 #include "CLHEP/Matrix/SymMatrix.h"
 
@@ -63,7 +63,7 @@ class ApeSettingAlgorithm : public AlignmentAlgorithmBase
   virtual ~ApeSettingAlgorithm();
 
   /// Call at beginning of job
-  virtual void initialize(const edm::EventSetup &setup, 
+  virtual void initialize(const edm::EventSetup &setup,
 			  AlignableTracker *tracker, AlignableMuon *muon, AlignableExtras *extras,
 			  AlignmentParameterStore *store) override;
 
@@ -72,6 +72,9 @@ class ApeSettingAlgorithm : public AlignmentAlgorithmBase
 
   /// Run the algorithm
   virtual void run(const edm::EventSetup &setup, const EventInfo &eventInfo) override;
+
+  // Call at end of run
+  virtual void endRun(const EndRunInfo &runInfo, const edm::EventSetup &setup) {};
 
  private:
   edm::ParameterSet         theConfig;

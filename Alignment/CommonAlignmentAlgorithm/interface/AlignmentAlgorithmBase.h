@@ -148,8 +148,8 @@ public:
   /// called at begin of run
   virtual void beginRun(const edm::EventSetup &setup) {};
 
-  /// called at end of run - order of arguments like in EDProducer etc.
-  virtual void endRun(const EndRunInfo &runInfo, const edm::EventSetup &setup) {};
+  /// Called at end of run (must be implemented in derived class)
+  virtual void endRun(const EndRunInfo&, const edm::EventSetup&) = 0;
 
   /// called at begin of luminosity block (no lumi block info passed yet)
   virtual void beginLuminosityBlock(const edm::EventSetup &setup) {};
