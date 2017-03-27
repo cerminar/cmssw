@@ -1,0 +1,46 @@
+
+
+
+
+cmsDriver.py step3 --conditions auto:run2_data_relval \
+-s RAW2DIGI,L1Reco,RECO,EI,PAT,ALCA:SiStripCalZeroBias+SiStripCalMinBias+TkAlMinBias+EcalESAlign,DQM:@standardDQM+@miniAODDQM \
+--runUnscheduled \
+--process reRECO \
+--data \
+--era Run2_2016 \
+--eventcontent RECO,MINIAOD,DQM \
+--hltProcess reHLT \
+--scenario pp \
+--datatier RECO,MINIAOD,DQMIO \
+--customise Configuration/DataProcessing/RecoTLR.customisePostEra_Run2_2016 \
+-n 100 \
+--filein /store/data/Run2016B/DoubleMuon/RAW/v2/000/274/199/00000/00B82081-6526-E611-9A62-02163E012B9E.root \
+--fileout file:step3.root \
+--no_exec
+
+
+cmsDriver.py step3 --conditions auto:run2_data_relval \
+-s RAW2DIGI,DQM \
+--process RECO \
+--data \
+--era Run2_2016 \
+--eventcontent DQM \
+--scenario pp \
+--datatier DQMIO \
+-n 100 \
+--filein /store/data/Run2016B/DoubleMuon/RAW/v2/000/274/199/00000/00B82081-6526-E611-9A62-02163E012B9E.root \
+--fileout file:step3.root \
+--no_exec
+
+
+
+
+cmsDriver.py step4 --data \
+--filetype DQM \
+--conditions auto:run2_data_relval \
+-s HARVESTING:@standardDQM \
+--scenario pp \
+-n 100 \
+--filein file:step3.root \
+--fileout file:step4.root \
+--no_exec
