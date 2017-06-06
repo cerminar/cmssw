@@ -26,7 +26,7 @@ using namespace std;
 using namespace edm;
 
 ProducePFCalibrationObject::ProducePFCalibrationObject(const edm::ParameterSet& pSet) {
-  
+
 
   read = pSet.getUntrackedParameter<bool>("read");
   write = pSet.getUntrackedParameter<bool>("write");
@@ -65,7 +65,7 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
   // ---------------------------------------------------------------------------------
   // Write the payload
 
- 
+
 
   if(write) {
 
@@ -89,7 +89,7 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
       pair<float, float> limits = make_pair((*fSetup).getUntrackedParameter<vector<double> >("limits")[0],
 					    (*fSetup).getUntrackedParameter<vector<double> >("limits")[1]);
       vector<double> parameters = (*fSetup).getUntrackedParameter<vector<double> >("parameters");
-    
+
       TF1 *function = new TF1(fType.c_str(),  formula.c_str(), limits.first, limits.second);
       for(unsigned int index = 0; index != parameters.size(); ++index) {
 	function->SetParameter(index, parameters[index]);
@@ -101,29 +101,29 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
       resToWrite.push_back(functType[fType]);
 
     }
-    
+
 
     // create the actual object storing the functions
     PhysicsTFormulaPayload allTFormulas(limitsToWrite, formulasToWrite);
-  
+
     // put them in the container
     PerformancePayloadFromTFormula * pfCalibrationFormulas =
       new PerformancePayloadFromTFormula(resToWrite,
 					 binsToWrite,
 					 allTFormulas);
 
-  
+
     // actually write to DB
     edm::Service<cond::service::PoolDBOutputService> dbOut;
     if(dbOut.isAvailable()) {
-      dbOut->writeOne<PerformancePayload>(pfCalibrationFormulas, 1, record);
+      dbOut->writeOne<PerformancePayloadFromTFormula>(pfCalibrationFormulas, 1, record);
     }
 
   }
 
 
-  
-  
+
+
   if(read) {
     // ---------------------------------------------------------------------------------
     // Read the objects
@@ -135,7 +135,7 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
     for(vector<string>::const_iterator name = fToRead.begin();
 	name != fToRead.end(); ++name) {
 
-      
+
 
       cout << "Function: " << *name << endl;
       PerformanceResult::ResultType fType = functType[*name];
@@ -143,7 +143,7 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
 
       // evaluate it @ 10 GeV
       float energy = 10.;
-      
+
       BinningPointByMap point;
       point.insert(BinningVariables::JetEt, energy);
 
@@ -195,7 +195,7 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
 //   std::vector<PerformanceResult::ResultType> res;
 //   res.push_back(PerformanceResult::PFfa_BARREL);
 //   res.push_back(PerformanceResult::PFfa_ENDCAP);
-		   
+
 //   std::vector<BinningVariables::BinningVariablesType> bin;
 //   bin.push_back(BinningVariables::JetEt);
 //   //  bin.push_back(BinningVariables::JetAbsEta);
@@ -203,15 +203,15 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
 //   bin.push_back(BinningVariables::JetEt);
 //   //  bin.push_back(BinningVariables::JetAbsEta);
 
-  
+
 //   PhysicsTFormulaPayload ppl(limits, formulas);
 // //   PerformanceResult::PFfa_BARREL
-    
+
 //   PerformancePayloadFromTFormula * pfCalibrationFormulas =
 //     new PerformancePayloadFromTFormula(res,
 // 				       bin,
 // 				       ppl);
-  
+
 
 //   double t = 10.;
 //   double eta = 2.1;
@@ -233,7 +233,7 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
 //     // this is the endcap
 //     etaBin = PerformanceResult::PFfa_BARREL;
 //     cout << " f_endcap(a): " << faEndcap->Eval(t) << endl;
-    
+
 // //     if(pfCalibrationFormulas->isInPayload(PerformanceResult::PFfa_ENDCAP, point)){
 // //       float value = pfCalibrationFormulas->getResult(PerformanceResult::PFfa_ENDCAP, point);
 // //       cout << "t: " << t << " eta: " << eta << " f_endcap(a): " << faEndcap->Eval(t) << " CalibObj: " <<
@@ -247,12 +247,12 @@ void ProducePFCalibrationObject::beginRun(const edm::Run& run, const edm::EventS
 //       value << endl;
 //   } else cout <<  "INVALID result!!!" << endl;
 
-  
+
 
 
 }
 
-     
+
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 DEFINE_FWK_MODULE(ProducePFCalibrationObject);
