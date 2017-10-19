@@ -4,7 +4,7 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerNtupleBase.h"
-
+#include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 
 
 class HGCalTriggerNtupleHGCTriggerCells : public HGCalTriggerNtupleBase
@@ -19,6 +19,7 @@ class HGCalTriggerNtupleHGCTriggerCells : public HGCalTriggerNtupleBase
   private:
     virtual void clear() override final;
 
+    HGCalTriggerTools triggerTools_;
 
     edm::EDGetToken trigger_cells_token_;
 
@@ -61,7 +62,7 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   tree.Branch("tc_layer", &tc_layer_);
   tree.Branch("tc_wafer", &tc_wafer_);
   tree.Branch("tc_wafertype", &tc_wafertype_);
-  tree.Branch("tc_cell", &tc_cell_);    
+  tree.Branch("tc_cell", &tc_cell_);
   tree.Branch("tc_data", &tc_data_);
   tree.Branch("tc_energy", &tc_energy_);
   tree.Branch("tc_eta", &tc_eta_);
@@ -84,6 +85,8 @@ fill(const edm::Event& e, const edm::EventSetup& es)
   edm::ESHandle<HGCalTriggerGeometryBase> geometry;
   es.get<CaloGeometryRecord>().get(geometry);
 
+  triggerTools_.setEventSetup(es);
+
   clear();
   for(auto tc_itr=trigger_cells.begin(0); tc_itr!=trigger_cells.end(0); tc_itr++)
   {
@@ -95,12 +98,12 @@ fill(const edm::Event& e, const edm::EventSetup& es)
       tc_id_.emplace_back(tc_itr->detId());
       tc_subdet_.emplace_back(id.subdetId());
       tc_side_.emplace_back(id.zside());
-      tc_layer_.emplace_back(id.layer());
+      tc_layer_.emplace_back(triggerTools_.getLayerWithOffset(id));
       tc_wafer_.emplace_back(id.wafer());
       tc_wafertype_.emplace_back(id.waferType());
       tc_cell_.emplace_back(id.cell());
       tc_data_.emplace_back(tc_itr->hwPt());
-      // physical values 
+      // physical values
       tc_energy_.emplace_back(tc_itr->energy());
       tc_eta_.emplace_back(tc_itr->eta());
       tc_phi_.emplace_back(tc_itr->phi());
@@ -128,7 +131,3 @@ clear()
   tc_phi_.clear();
   tc_z_.clear();
 }
-
-
-
-

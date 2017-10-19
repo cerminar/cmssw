@@ -5,6 +5,7 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerNtupleBase.h"
+#include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 
 
 
@@ -20,6 +21,7 @@ class HGCalTriggerNtupleHGCClusters : public HGCalTriggerNtupleBase
   private:
     virtual void clear() override final;
 
+    HGCalTriggerTools triggerTools_;
 
     edm::EDGetToken clusters_token_;
 
@@ -29,8 +31,8 @@ class HGCalTriggerNtupleHGCClusters : public HGCalTriggerNtupleBase
     std::vector<float> cl_eta_;
     std::vector<float> cl_phi_;
     std::vector<int> cl_layer_;
-    std::vector<int> cl_ncells_;   
-    std::vector<std::vector<unsigned>> cl_cells_;   
+    std::vector<int> cl_ncells_;
+    std::vector<std::vector<unsigned>> cl_cells_;
 
 };
 
@@ -54,7 +56,7 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   tree.Branch("cl_pt", &cl_pt_);
   tree.Branch("cl_energy", &cl_energy_);
   tree.Branch("cl_eta", &cl_eta_);
-  tree.Branch("cl_phi", &cl_phi_);  
+  tree.Branch("cl_phi", &cl_phi_);
   tree.Branch("cl_layer", &cl_layer_);
   tree.Branch("cl_ncells", &cl_ncells_);
   tree.Branch("cl_cells", &cl_cells_);
@@ -74,16 +76,18 @@ fill(const edm::Event& e, const edm::EventSetup& es)
   edm::ESHandle<HGCalTriggerGeometryBase> geometry;
   es.get<CaloGeometryRecord>().get(geometry);
 
+  triggerTools_.setEventSetup(es);
+
   clear();
   for(auto cl_itr=clusters.begin(0); cl_itr!=clusters.end(0); cl_itr++)
   {
     cl_n_++;
-    // physical values 
+    // physical values
     cl_pt_.emplace_back(cl_itr->pt());
     cl_energy_.emplace_back(cl_itr->energy());
     cl_eta_.emplace_back(cl_itr->eta());
     cl_phi_.emplace_back(cl_itr->phi());
-    cl_layer_.emplace_back(cl_itr->layer());
+    cl_layer_.emplace_back(triggerTools_.getLayerWithOffset(cl_itr->detId()));
     cl_ncells_.emplace_back(cl_itr->constituents().size());
     // Retrieve indices of trigger cells inside cluster
     cl_cells_.emplace_back(cl_itr->constituents().size());
@@ -107,7 +111,3 @@ clear()
   cl_ncells_.clear();
   cl_cells_.clear();
 }
-
-
-
-
