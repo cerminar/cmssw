@@ -5,9 +5,16 @@ ntuple_event = cms.PSet(
     NtupleName = cms.string('HGCalTriggerNtupleEvent')
 )
 
+
+from FastSimulation.Event.ParticleFilter_cfi import ParticleFilterBlock
+PartFilterConfig = ParticleFilterBlock.ParticleFilter.copy()
+PartFilterConfig.protonEMin = cms.double(100000)
+PartFilterConfig.etaMax = cms.double(3.1)
+
 ntuple_gen = cms.PSet(
     NtupleName = cms.string('HGCalTriggerNtupleGen'),
-    GenParticles = cms.InputTag('genParticles')
+    GenParticles = cms.InputTag('genParticles'),
+    TestParticleFilter = PartFilterConfig
 )
 
 ntuple_gentau = cms.PSet(
