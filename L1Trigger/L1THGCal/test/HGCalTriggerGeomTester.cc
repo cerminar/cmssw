@@ -124,6 +124,7 @@ class HGCalTriggerGeomTester : public edm::EDAnalyzer
         std::shared_ptr<float> triggerCellCell_y_     ;
         std::shared_ptr<float> triggerCellCell_z_     ;
         int   cellId_     ;
+        int cellTriggerCell_id_;
         int   cellSide_   ;
         int   cellSubdet_ ;
         int   cellLayer_  ;
@@ -144,6 +145,7 @@ class HGCalTriggerGeomTester : public edm::EDAnalyzer
         float cellX4_     ;
         float cellY4_     ;
         int   cellBHId_     ;
+        int cellBHTriggerCellId_ ;
         int   cellBHSide_   ;
         int   cellBHSubdet_ ;
         int   cellBHLayer_  ;
@@ -273,6 +275,8 @@ HGCalTriggerGeomTester::HGCalTriggerGeomTester(const edm::ParameterSet& conf):
     //
     treeCells_ = fs_->make<TTree>("TreeCells","Tree of all HGC cells");
     treeCells_->Branch("id"             , &cellId_            , "id/I");
+    treeCells_->Branch("tc_id"             , &cellTriggerCell_id_            , "tc_id/I");
+
     treeCells_->Branch("zside"          , &cellSide_          , "zside/I");
     treeCells_->Branch("subdet"         , &cellSubdet_        , "subdet/I");
     treeCells_->Branch("layer"          , &cellLayer_         , "layer/I");
@@ -295,6 +299,8 @@ HGCalTriggerGeomTester::HGCalTriggerGeomTester(const edm::ParameterSet& conf):
     //
     treeCellsBH_ = fs_->make<TTree>("TreeCellsBH","Tree of all BH cells");
     treeCellsBH_->Branch("id", &cellBHId_, "id/I");
+    treeCellsBH_->Branch("tc_id", &cellBHTriggerCellId_, "tc_id/I");
+
     treeCellsBH_->Branch("zside", &cellBHSide_, "zside/I");
     treeCellsBH_->Branch("subdet", &cellBHSubdet_, "subdet/I");
     treeCellsBH_->Branch("layer", &cellBHLayer_, "layer/I");
@@ -603,13 +609,14 @@ void HGCalTriggerGeomTester::fillTriggerGeometry()
     for(const auto& id : triggerGeometry_->eeGeometry().getValidGeomDetIds())
     {
         if(id.rawId()==0) continue;
-        HGCalDetId waferid(id); 
+        HGCalDetId waferid(id);
         int nCells = triggerGeometry_->eeTopology().dddConstants().numberCellsHexagon(waferid.wafer());
         for(int i=0;i<nCells;i++)
         {
             HGCalDetId id(ForwardSubdetector(waferid.subdetId()), waferid.zside(), waferid.layer(), waferid.waferType(), waferid.wafer(), i);
             if(!triggerGeometry_->eeTopology().valid(id)) continue;
             cellId_         = id.rawId();
+            cellTriggerCell_id_ = triggerGeometry_->getTriggerCellFromCell(id);
             cellSide_       = id.zside();
             cellSubdet_     = id.subdetId();
             cellLayer_      = id.layer();
@@ -653,13 +660,14 @@ void HGCalTriggerGeomTester::fillTriggerGeometry()
     for(const auto& id : triggerGeometry_->fhGeometry().getValidGeomDetIds())
     {
         if(id.rawId()==0) continue;
-        HGCalDetId waferid(id); 
+        HGCalDetId waferid(id);
         int nCells = triggerGeometry_->fhTopology().dddConstants().numberCellsHexagon(waferid.wafer());
         for(int i=0;i<nCells;i++)
         {
             HGCalDetId id(ForwardSubdetector(waferid.subdetId()), waferid.zside(), waferid.layer(), waferid.waferType(), waferid.wafer(), i);
             if(!triggerGeometry_->fhTopology().valid(id)) continue;
             cellId_         = id.rawId();
+            cellTriggerCell_id_ = triggerGeometry_->getTriggerCellFromCell(id);
             cellSide_       = id.zside();
             cellSubdet_     = id.subdetId();
             cellLayer_      = id.layer();
@@ -704,8 +712,9 @@ void HGCalTriggerGeomTester::fillTriggerGeometry()
     for(const auto& id : triggerGeometry_->caloGeometry()->getSubdetectorGeometry(DetId::Hcal,HcalEndcap)->getValidDetIds())
     {
         if(id.rawId()==0 || id.subdetId()!=2) continue;
-        HcalDetId cellid(id); 
+        HcalDetId cellid(id);
         cellBHId_ = cellid.rawId();
+        cellBHTriggerCellId_ = triggerGeometry_->getTriggerCellFromCell(cellid);
         cellBHSide_ = cellid.zside();
         cellBHSubdet_ = cellid.subdetId();
         cellBHLayer_ = cellid.depth();
