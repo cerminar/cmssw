@@ -7,6 +7,7 @@ from Calibration.TkAlCaRecoProducers.AlcaSiStripGainsHarvester_cff import *
 from Calibration.TkAlCaRecoProducers.AlcaSiStripGainsAAGHarvester_cff import *
 from Alignment.CommonAlignmentProducer.AlcaSiPixelAliHarvester_cff import *
 from Calibration.EcalCalibAlgos.AlcaEcalPedestalsHarvester_cff import *
+from CalibTracker.SiPixelQuality.SiPixelStatusHarvester_cff import *
 
 from Calibration.TkAlCaRecoProducers.PCLMetadataWriter_cfi import *
 
@@ -130,6 +131,17 @@ ALCAHARVESTEcalPedestals_dbOutput = cms.PSet(record = cms.string('EcalPedestalsR
                                              )
 
 
+# SiPixel Quality
+ALCAHARVESTSiPixelQuality = siPixelStatusHarvester.clone()
+ALCAHARVESTSiPixelQuality.SiPixelStatusManagerParameters.outputBase = cms.untracked.string("dynamicLumibased")
+ALCAHARVESTSiPixelQuality.SiPixelStatusManagerParameters.aveDigiOcc = cms.untracked.int32(20000)
+
+ALCAHARVESTSiPixelQuality_metadata = cms.PSet(record = cms.untracked.string('SiPixelQualityFromDbRcd'))
+ALCAHARVESTSiPixelQuality_dbOutput = cms.PSet(record = cms.string('SiPixelQualityFromDbRcd_prompt'),
+                                              tag = cms.string('SiPixelQuality_prompt'),
+                                              timetype   = cms.untracked.string('lumiid')
+                                              )
+
 # define all the paths
 BeamSpotByRun  = cms.Path(ALCAHARVESTBeamSpotByRun)
 BeamSpotByLumi = cms.Path(ALCAHARVESTBeamSpotByLumi)
@@ -140,6 +152,7 @@ SiStripGains   = cms.Path(ALCAHARVESTSiStripGains)
 SiPixelAli     = cms.Path(ALCAHARVESTSiPixelAli)
 EcalPedestals  = cms.Path(ALCAHARVESTEcalPedestals)
 SiStripGainsAAG = cms.Path(ALCAHARVESTSiStripGainsAAG)
+
 
 ALCAHARVESTDQMSaveAndMetadataWriter = cms.Path(dqmSaver+pclMetadataWriter)
 
