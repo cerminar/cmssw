@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 import SimCalorimetry.HGCalSimProducers.hgcalDigitizer_cfi as digiparam
 import RecoLocalCalo.HGCalRecProducers.HGCalUncalibRecHit_cfi as recoparam
-import RecoLocalCalo.HGCalRecProducers.HGCalRecHit_cfi as recocalibparam 
+import RecoLocalCalo.HGCalRecProducers.HGCalRecHit_cfi as recocalibparam
 import hgcalLayersCalibrationCoefficients_cfi as layercalibparam
 
 # Digitization parameters
@@ -61,7 +61,7 @@ C2d_parValues = cms.PSet( seeding_threshold_silicon = cms.double(5), # MipT
                           seeding_threshold_scintillator = cms.double(5), # MipT
                           clustering_threshold_silicon = cms.double(2), # MipT
                           clustering_threshold_scintillator = cms.double(2), # MipT
-                          clusterType = cms.string('NNC2d'), 
+                          clusterType = cms.string('NNC2d'),
                           applyLayerCalibration = cms.bool(True),
                           layerWeights = layercalibparam.TrgLayer_weights,
                           # Parameters not used by this clustering
@@ -86,11 +86,7 @@ cluster_algo =  cms.PSet( AlgorithmName = cms.string('HGCClusterAlgoThreshold'),
                           C3d_parameters = C3d_parValues.clone()
                           )
 
-towerMap2D_parValues = cms.PSet( nEtaBins = cms.int32(18),
-                                 nPhiBins = cms.int32(72),
-                                 etaBins = cms.vdouble(),
-                                 phiBins = cms.vdouble(),
-                                 useLayerWeights = cms.bool(False),
+towerMap2D_parValues = cms.PSet( useLayerWeights = cms.bool(False),
                                  layerWeights = cms.vdouble()
                                  )
 
@@ -106,7 +102,7 @@ hgcalTriggerPrimitiveDigiProducer = cms.EDProducer(
     fhDigis = cms.InputTag('mix:HGCDigisHEfront'),
     bhDigis = cms.InputTag('mix:HGCDigisHEback'),
     FECodec = fe_codec.clone(),
-    BEConfiguration = cms.PSet( 
+    BEConfiguration = cms.PSet(
         algorithms = cms.VPSet( cluster_algo,
                                 tower_algo )
         )
@@ -116,7 +112,7 @@ hgcalTriggerPrimitiveDigiFEReproducer = cms.EDProducer(
     "HGCalTriggerDigiFEReproducer",
     feDigis = cms.InputTag('hgcalTriggerPrimitiveDigiProducer'),
     FECodec = fe_codec.clone(),
-    BEConfiguration = cms.PSet( 
+    BEConfiguration = cms.PSet(
         algorithms = cms.VPSet( cluster_algo,
                                 tower_algo)
         )
