@@ -136,10 +136,10 @@ ALCAHARVESTSiPixelQuality = siPixelStatusHarvester.clone()
 ALCAHARVESTSiPixelQuality.SiPixelStatusManagerParameters.outputBase = cms.untracked.string("dynamicLumibased")
 ALCAHARVESTSiPixelQuality.SiPixelStatusManagerParameters.aveDigiOcc = cms.untracked.int32(20000)
 
-ALCAHARVESTSiPixelQuality_metadata = cms.VPSet(cms.PSet(record = cms.string('SiPixelQualityFromDbRcd_PCL')),
-                                               cms.PSet(record = cms.string('SiPixelQualityFromDbRcd_permanentBad')),
-                                               cms.PSet(record = cms.string('SiPixelQualityFromDbRcd_stuckTBM')),
-                                               cms.PSet(record = cms.string('SiPixelQualityFromDbRcd_other')))
+ALCAHARVESTSiPixelQuality_metadata = cms.VPSet(cms.PSet(record = cms.untracked.string('SiPixelQualityFromDbRcd_PCL')),
+                                               cms.PSet(record = cms.untracked.string('SiPixelQualityFromDbRcd_permanentBad')),
+                                               cms.PSet(record = cms.untracked.string('SiPixelQualityFromDbRcd_stuckTBM')),
+                                               cms.PSet(record = cms.untracked.string('SiPixelQualityFromDbRcd_other')))
 ALCAHARVESTSiPixelQuality_dbOutput = cms.VPSet(cms.PSet(record = cms.string('SiPixelQualityFromDbRcd_PCL'),
                                                         tag = cms.string('SiPixelQualityFromDbRcd_PCL'),
                                                         timetype = cms.untracked.string('lumiid')
