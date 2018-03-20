@@ -7,6 +7,7 @@ from Calibration.TkAlCaRecoProducers.AlcaSiStripGainsHarvester_cff import *
 from Calibration.TkAlCaRecoProducers.AlcaSiStripGainsAAGHarvester_cff import *
 from Alignment.CommonAlignmentProducer.AlcaSiPixelAliHarvester_cff import *
 from Calibration.EcalCalibAlgos.AlcaEcalPedestalsHarvester_cff import *
+from CalibTracker.SiPixelQuality.SiPixelStatusHarvester_cfi import *
 
 from Calibration.TkAlCaRecoProducers.PCLMetadataWriter_cfi import *
 
@@ -130,6 +131,45 @@ ALCAHARVESTEcalPedestals_dbOutput = cms.PSet(record = cms.string('EcalPedestalsR
                                              )
 
 
+# SiPixel Quality
+ALCAHARVESTSiPixelQuality = siPixelStatusHarvester.clone()
+ALCAHARVESTSiPixelQuality.SiPixelStatusManagerParameters.outputBase = cms.untracked.string("dynamicLumibased")
+ALCAHARVESTSiPixelQuality.SiPixelStatusManagerParameters.aveDigiOcc = cms.untracked.int32(20000)
+
+ALCAHARVESTSiPixelQuality_metadata = cms.PSet(record = cms.untracked.string('SiPixelQualityFromDbRcd_prompt'))
+ALCAHARVESTSiPixelQuality_dbOutput = cms.PSet(
+                                         record = cms.string('SiPixelQualityFromDbRcd_prompt'),
+                                         tag = cms.string('SiPixelQualityFromDbRcd_prompt'),
+                                         timetype = cms.untracked.string('lumiid')
+                                         )
+
+ALCAHARVESTSiPixelQualityMonitor_dbOutput = cms.VPSet(
+        cms.PSet(
+            record = cms.string('SiPixelQualityFromDbRcd_PCL'),
+            tag = cms.string('SiPixelQualityFromDbRcd_PCL'),
+            timetype = cms.untracked.string('lumiid')
+        ),
+        cms.PSet(
+            record = cms.string('SiPixelQualityFromDbRcd_permanentBad'),
+            tag = cms.string('SiPixelQualityFromDbRcd_permanentBad'),
+            timetype = cms.untracked.string('runnumber')
+        ),
+        cms.PSet(
+            record = cms.string('SiPixelQualityFromDbRcd_stuckTBM'),
+            tag = cms.string('SiPixelQualityFromDbRcd_stuckTBM'),
+            timetype = cms.untracked.string('lumiid'),
+        ),
+        cms.PSet(
+            record = cms.string('SiPixelQualityFromDbRcd_other'),
+            tag = cms.string('SiPixelQualityFromDbRcd_other'),
+            timetype = cms.untracked.string('lumiid')
+        )
+
+)
+
+#other payloads produced in SiPixeQuality Harvestor for monitoring
+PoolDBOutputService.toPut = ALCAHARVESTSiPixelQualityMonitor_dbOutput
+
 # define all the paths
 BeamSpotByRun  = cms.Path(ALCAHARVESTBeamSpotByRun)
 BeamSpotByLumi = cms.Path(ALCAHARVESTBeamSpotByLumi)
@@ -140,6 +180,7 @@ SiStripGains   = cms.Path(ALCAHARVESTSiStripGains)
 SiPixelAli     = cms.Path(ALCAHARVESTSiPixelAli)
 EcalPedestals  = cms.Path(ALCAHARVESTEcalPedestals)
 SiStripGainsAAG = cms.Path(ALCAHARVESTSiStripGainsAAG)
+SiPixelQuality = cms.Path(ALCAHARVESTSiPixelQuality)
 
 ALCAHARVESTDQMSaveAndMetadataWriter = cms.Path(dqmSaver+pclMetadataWriter)
 
