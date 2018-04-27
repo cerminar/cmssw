@@ -26,10 +26,10 @@
 
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
 
-#include <stdlib.h> 
+#include <stdlib.h>
 
-namespace 
-{  
+namespace
+{
     template<typename T>
     struct array_deleter
     {
@@ -38,7 +38,7 @@ namespace
 }
 
 
-class HGCalTriggerGeomTester : public edm::EDAnalyzer 
+class HGCalTriggerGeomTester : public edm::EDAnalyzer
 {
     public:
         explicit HGCalTriggerGeomTester(const edm::ParameterSet& );
@@ -80,6 +80,7 @@ class HGCalTriggerGeomTester : public edm::EDAnalyzer
         std::shared_ptr<int>   moduleTC_subdet_;
         std::shared_ptr<int>   moduleTC_layer_ ;
         std::shared_ptr<int>   moduleTC_wafer_;
+        std::shared_ptr<int>   moduleTC_waferType_;
         std::shared_ptr<int>   moduleTC_cell_  ;
         std::shared_ptr<float> moduleTC_x_     ;
         std::shared_ptr<float> moduleTC_y_     ;
@@ -99,6 +100,7 @@ class HGCalTriggerGeomTester : public edm::EDAnalyzer
         int   triggerCellSubdet_ ;
         int   triggerCellLayer_  ;
         int   triggerCellWafer_ ;
+        int   triggerCellWaferType_ ;
         int   triggerCell_       ;
         float triggerCellX_      ;
         float triggerCellY_      ;
@@ -164,7 +166,7 @@ class HGCalTriggerGeomTester : public edm::EDAnalyzer
         float cellBHY3_     ;
         float cellBHX4_     ;
         float cellBHY4_     ;
-        
+
 };
 
 
@@ -191,6 +193,7 @@ HGCalTriggerGeomTester::HGCalTriggerGeomTester(const edm::ParameterSet& conf):
     moduleTC_subdet_.reset(new int[1],   array_deleter<int>());
     moduleTC_layer_ .reset(new int[1],   array_deleter<int>());
     moduleTC_wafer_ .reset(new int[1],   array_deleter<int>());
+    moduleTC_waferType_ .reset(new int[1],   array_deleter<int>());
     moduleTC_cell_  .reset(new int[1],   array_deleter<int>());
     moduleTC_x_     .reset(new float[1], array_deleter<float>());
     moduleTC_y_     .reset(new float[1], array_deleter<float>());
@@ -200,6 +203,7 @@ HGCalTriggerGeomTester::HGCalTriggerGeomTester(const edm::ParameterSet& conf):
     treeModules_->Branch("tc_subdet"      , moduleTC_subdet_.get() , "tc_subdet[tc_n]/I");
     treeModules_->Branch("tc_layer"       , moduleTC_layer_.get()  , "tc_layer[tc_n]/I");
     treeModules_->Branch("tc_wafer"       , moduleTC_wafer_.get()  , "tc_wafer[tc_n]/I");
+    treeModules_->Branch("tc_waferType"       , moduleTC_waferType_.get()  , "tc_waferType[tc_n]/I");
     treeModules_->Branch("tc_cell"        , moduleTC_cell_.get()   , "tc_cell[tc_n]/I");
     treeModules_->Branch("tc_x"           , moduleTC_x_.get()      , "tc_x[tc_n]/F");
     treeModules_->Branch("tc_y"           , moduleTC_y_.get()      , "tc_y[tc_n]/F");
@@ -230,6 +234,8 @@ HGCalTriggerGeomTester::HGCalTriggerGeomTester(const edm::ParameterSet& conf):
     treeTriggerCells_->Branch("subdet"         , &triggerCellSubdet_        , "subdet/I");
     treeTriggerCells_->Branch("layer"          , &triggerCellLayer_         , "layer/I");
     treeTriggerCells_->Branch("wafer"          , &triggerCellWafer_          , "wafer/I");
+    treeTriggerCells_->Branch("wafertype"          , &triggerCellWaferType_          , "wafertype/I");
+
     treeTriggerCells_->Branch("triggercell"    , &triggerCell_              , "triggercell/I");
     treeTriggerCells_->Branch("x"              , &triggerCellX_             , "x/F");
     treeTriggerCells_->Branch("y"              , &triggerCellY_             , "y/F");
@@ -324,13 +330,13 @@ HGCalTriggerGeomTester::HGCalTriggerGeomTester(const edm::ParameterSet& conf):
 
 
 /*****************************************************************/
-HGCalTriggerGeomTester::~HGCalTriggerGeomTester() 
+HGCalTriggerGeomTester::~HGCalTriggerGeomTester()
 /*****************************************************************/
 {
 }
 
 /*****************************************************************/
-void HGCalTriggerGeomTester::beginRun(const edm::Run& /*run*/, 
+void HGCalTriggerGeomTester::beginRun(const edm::Run& /*run*/,
                                           const edm::EventSetup& es)
 /*****************************************************************/
 {
@@ -360,7 +366,7 @@ void HGCalTriggerGeomTester::beginRun(const edm::Run& /*run*/,
 
 void HGCalTriggerGeomTester::checkMappingConsistency()
 {
-    
+
 
 
 
@@ -372,7 +378,7 @@ void HGCalTriggerGeomTester::checkMappingConsistency()
     for(const auto& id : triggerGeometry_->eeGeometry()->getValidGeomDetIds())
     {
         if(id.rawId()==0) continue;
-        HGCalDetId waferid(id); 
+        HGCalDetId waferid(id);
         int nCells = triggerGeometry_->eeTopology().dddConstants().numberCellsHexagon(waferid.wafer());
         for(int i=0;i<nCells;i++)
         {
@@ -392,7 +398,7 @@ void HGCalTriggerGeomTester::checkMappingConsistency()
     for(const auto& id : triggerGeometry_->fhGeometry()->getValidGeomDetIds())
     {
         if(id.rawId()==0) continue;
-        HGCalDetId waferid(id); 
+        HGCalDetId waferid(id);
         int nCells = triggerGeometry_->fhTopology().dddConstants().numberCellsHexagon(waferid.wafer());
         for(int i=0;i<nCells;i++)
         {
@@ -521,7 +527,7 @@ void HGCalTriggerGeomTester::checkNeighborConsistency()
     for(const auto& id : triggerGeometry_->eeGeometry()->getValidGeomDetIds())
     {
         if(id.rawId()==0) continue;
-        HGCalDetId waferid(id); 
+        HGCalDetId waferid(id);
         int nCells = triggerGeometry_->eeTopology().dddConstants().numberCellsHexagon(waferid.wafer());
         for(int i=0;i<nCells;i++)
         {
@@ -540,7 +546,7 @@ void HGCalTriggerGeomTester::checkNeighborConsistency()
     for(const auto& id : triggerGeometry_->fhGeometry()->getValidGeomDetIds())
     {
         if(id.rawId()==0) continue;
-        HGCalDetId waferid(id); 
+        HGCalDetId waferid(id);
         int nCells = triggerGeometry_->fhTopology().dddConstants().numberCellsHexagon(waferid.wafer());
         for(int i=0;i<nCells;i++)
         {
@@ -766,6 +772,7 @@ void HGCalTriggerGeomTester::fillTriggerGeometry()
         triggerCellSubdet_ = id.subdetId();
         triggerCellLayer_  = id.layer();
         triggerCellWafer_  = id.wafer();
+        triggerCellWaferType_  = id.waferType();
         triggerCell_       = id.cell();
         triggerCellX_      = position.x();
         triggerCellY_      = position.y();
@@ -865,6 +872,7 @@ void HGCalTriggerGeomTester::fillTriggerGeometry()
             moduleTC_subdet_.get()[itc] = tcId.subdetId();
             moduleTC_layer_ .get()[itc] = tcId.layer();
             moduleTC_wafer_ .get()[itc] = tcId.wafer();
+            moduleTC_waferType_ .get()[itc] = tcId.waferType();
             moduleTC_cell_  .get()[itc] = tcId.cell();
             moduleTC_x_     .get()[itc] = position.x();
             moduleTC_y_     .get()[itc] = position.y();
@@ -899,8 +907,8 @@ void HGCalTriggerGeomTester::fillTriggerGeometry()
 
 
 /*****************************************************************/
-void HGCalTriggerGeomTester::analyze(const edm::Event& e, 
-        const edm::EventSetup& es) 
+void HGCalTriggerGeomTester::analyze(const edm::Event& e,
+        const edm::EventSetup& es)
 /*****************************************************************/
 {
 
@@ -908,7 +916,7 @@ void HGCalTriggerGeomTester::analyze(const edm::Event& e,
 
 
 /*****************************************************************/
-void HGCalTriggerGeomTester::setTreeModuleSize(const size_t n) 
+void HGCalTriggerGeomTester::setTreeModuleSize(const size_t n)
 /*****************************************************************/
 {
     moduleTC_id_    .reset(new int[n],   array_deleter<int>());
@@ -916,6 +924,7 @@ void HGCalTriggerGeomTester::setTreeModuleSize(const size_t n)
     moduleTC_subdet_.reset(new int[n],   array_deleter<int>());
     moduleTC_layer_ .reset(new int[n],   array_deleter<int>());
     moduleTC_wafer_ .reset(new int[n],   array_deleter<int>());
+    moduleTC_waferType_ .reset(new int[n],   array_deleter<int>());
     moduleTC_cell_  .reset(new int[n],   array_deleter<int>());
     moduleTC_x_     .reset(new float[n], array_deleter<float>());
     moduleTC_y_     .reset(new float[n], array_deleter<float>());
@@ -926,6 +935,7 @@ void HGCalTriggerGeomTester::setTreeModuleSize(const size_t n)
     treeModules_->GetBranch("tc_subdet") ->SetAddress(moduleTC_subdet_.get());
     treeModules_->GetBranch("tc_layer")  ->SetAddress(moduleTC_layer_ .get());
     treeModules_->GetBranch("tc_wafer")  ->SetAddress(moduleTC_wafer_ .get());
+    treeModules_->GetBranch("tc_waferType")  ->SetAddress(moduleTC_waferType_ .get());
     treeModules_->GetBranch("tc_cell")   ->SetAddress(moduleTC_cell_  .get());
     treeModules_->GetBranch("tc_x")      ->SetAddress(moduleTC_x_     .get());
     treeModules_->GetBranch("tc_y")      ->SetAddress(moduleTC_y_     .get());
@@ -933,7 +943,7 @@ void HGCalTriggerGeomTester::setTreeModuleSize(const size_t n)
 }
 
 /*****************************************************************/
-void HGCalTriggerGeomTester::setTreeModuleCellSize(const size_t n) 
+void HGCalTriggerGeomTester::setTreeModuleCellSize(const size_t n)
 /*****************************************************************/
 {
     moduleCell_id_    .reset(new int[n],   array_deleter<int>());
@@ -958,7 +968,7 @@ void HGCalTriggerGeomTester::setTreeModuleCellSize(const size_t n)
 }
 
 /*****************************************************************/
-void HGCalTriggerGeomTester::setTreeTriggerCellSize(const size_t n) 
+void HGCalTriggerGeomTester::setTreeTriggerCellSize(const size_t n)
 /*****************************************************************/
 {
     triggerCellCell_id_    .reset(new int[n],   array_deleter<int>());
@@ -989,7 +999,7 @@ void HGCalTriggerGeomTester::setTreeTriggerCellSize(const size_t n)
 
 
 /*****************************************************************/
-void HGCalTriggerGeomTester::setTreeTriggerCellNeighborSize(const size_t n) 
+void HGCalTriggerGeomTester::setTreeTriggerCellNeighborSize(const size_t n)
 /*****************************************************************/
 {
     triggerCellNeighbor_id_.reset(new int[n],array_deleter<int>());
