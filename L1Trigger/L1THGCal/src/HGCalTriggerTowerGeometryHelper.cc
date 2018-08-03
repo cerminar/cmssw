@@ -50,7 +50,7 @@ HGCalTriggerTowerGeometryHelper::HGCalTriggerTowerGeometryHelper(const edm::Para
       for(unsigned int bin2 = 0; bin2 != nBinsPhi_; bin2++) {
         l1t::HGCalTowerID towerId(zside, bin1, bin2);
         tower_coords_.emplace_back(towerId.rawId(),
-                                   (binsEta_[bin1+1] + binsEta_[bin1])/2,
+                                   zside*(binsEta_[bin1+1] + binsEta_[bin1])/2,
                                    (binsPhi_[bin2+1] + binsPhi_[bin2])/2);
       }
     }
@@ -111,7 +111,7 @@ unsigned short HGCalTriggerTowerGeometryHelper::getTriggerTowerFromTriggerCell(c
       edm::LogError("HGCalTriggerTowerGeometryHelper") << " did not manage to map TC " << trigger_cell_id << " (eta: " << eta << ") to any Trigger Tower\n";
     }
   } else {
-    bin_eta = bin_eta_l - binsEta_.begin();
+    bin_eta = bin_eta_l - binsEta_.begin() - 1;
   }
 
 
@@ -126,7 +126,7 @@ unsigned short HGCalTriggerTowerGeometryHelper::getTriggerTowerFromTriggerCell(c
       edm::LogError("HGCalTriggerTowerGeometryHelper") << " did not manage to map TC " << trigger_cell_id << " (phi: " << phi << ") to any Trigger Tower\n";
     }
   } else {
-    bin_phi = bin_phi_l - binsPhi_.begin();
+    bin_phi = bin_phi_l - binsPhi_.begin() - 1;
   }
   int zside = eta < 0 ?  -1 : 1;
   // std::cout << "TC " << trigger_cell_id << " eta: " << eta << " phi: " << phi << " mapped to bin: (" << zside << ", " << bin_eta << ", " << bin_phi << ")" << std::endl;
