@@ -46,6 +46,7 @@ class HGCalTriggerNtupleHGCMulticlusters : public HGCalTriggerNtupleBase
     std::vector<float> cl3d_srrmean_;
     std::vector<float> cl3d_emaxe_;
     std::vector<float> cl3d_bdteg_;
+    std::vector<float> cl3d_hoe_;
     std::vector<int> cl3d_quality_;
 };
 
@@ -65,7 +66,7 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
 {
   multiclusters_token_ = collector.consumes<l1t::HGCalMulticlusterBxCollection>(conf.getParameter<edm::InputTag>("Multiclusters"));
   id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
-  id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification")); 
+  id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification"));
 
   tree.Branch("cl3d_n", &cl3d_n_, "cl3d_n/I");
   tree.Branch("cl3d_id", &cl3d_id_);
@@ -89,6 +90,7 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   tree.Branch("cl3d_srrmean", &cl3d_srrmean_);
   tree.Branch("cl3d_emaxe", &cl3d_emaxe_);
   tree.Branch("cl3d_bdteg", &cl3d_bdteg_);
+  tree.Branch("cl3d_hoe", &cl3d_hoe_);
   tree.Branch("cl3d_quality", &cl3d_quality_);
 
 }
@@ -112,7 +114,7 @@ fill(const edm::Event& e, const edm::EventSetup& es)
   {
     cl3d_n_++;
     cl3d_id_.emplace_back(cl3d_itr->detId());
-    // physical values 
+    // physical values
     cl3d_pt_.emplace_back(cl3d_itr->pt());
     cl3d_energy_.emplace_back(cl3d_itr->energy());
     cl3d_eta_.emplace_back(cl3d_itr->eta());
@@ -132,6 +134,7 @@ fill(const edm::Event& e, const edm::EventSetup& es)
     cl3d_srrmean_.emplace_back(cl3d_itr->sigmaRRMean());
     cl3d_emaxe_.emplace_back(cl3d_itr->eMax()/cl3d_itr->energy());
     cl3d_bdteg_.emplace_back(id_->value(*cl3d_itr));
+    cl3d_hoe_.emplace_back(cl3d_itr->hOverE());
     cl3d_quality_.emplace_back(cl3d_itr->hwQual());
 
     // Retrieve indices of trigger cells inside cluster
@@ -169,9 +172,6 @@ clear()
   cl3d_srrmean_.clear();
   cl3d_emaxe_.clear();
   cl3d_bdteg_.clear();
+  cl3d_hoe_.clear();
   cl3d_quality_.clear();
 }
-
-
-
-
