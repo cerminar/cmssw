@@ -130,6 +130,19 @@ tower_algo =  cms.PSet( AlgorithmName = cms.string('HGCTowerAlgoThreshold'),
                         towermap_parameters = towerMap2D_parValues.clone()
                         )
 
+simtower_signal_algo = cms.PSet( AlgorithmName = cms.string('HGCSimFractionTowerAlgoThreshold'),
+                        FECodec = fe_codec.clone(),
+                        calib_parameters = calib_parValues.clone(),
+                        towermap_parameters = towerMap2D_parValues.clone(),
+                        simClusterSelection = cms.string("eventId().event() == 0 || pt() > 2"),
+                        simClusters = cms.InputTag("mix:MergedCaloTruth"),
+                        tcLabel = cms.string("SignalSimFractionTowerTCs"),
+                        towerMapLabel = cms.string("SignalSimFractionTowerMap"),
+                        towerLabel = cms.string("SignalSimFractionTower"),
+                        )
+
+
+
 hgcalTriggerPrimitiveDigiProducer = cms.EDProducer(
     "HGCalTriggerDigiProducer",
     eeDigis = cms.InputTag('mix:HGCDigisEE'),
