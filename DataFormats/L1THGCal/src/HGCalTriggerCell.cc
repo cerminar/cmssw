@@ -15,7 +15,7 @@ HGCalTriggerCell( const LorentzVector& p4,
 }
 
 HGCalTriggerCell::
-~HGCalTriggerCell() 
+~HGCalTriggerCell()
 {
 }
 
