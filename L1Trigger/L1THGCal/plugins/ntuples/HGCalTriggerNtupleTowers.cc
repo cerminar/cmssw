@@ -35,6 +35,8 @@ class HGCalTriggerNtupleHGCTowers : public HGCalTriggerNtupleBase
     std::vector<int> tower_iPhi_;
     std::vector<std::vector<float> > tower_etLayers_;
 
+    std::string branch_name_prefix_;
+
 };
 
 DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
@@ -53,17 +55,18 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
 {
   towers_token_ = collector.consumes<l1t::HGCalTowerBxCollection>(conf.getParameter<edm::InputTag>("Towers"));
   tower_maps_token_ = collector.consumes<l1t::HGCalTowerMapBxCollection>(conf.getParameter<edm::InputTag>("TowerMaps"));
+  branch_name_prefix_ = conf.getUntrackedParameter<std::string>("BranchNamePrefix", "tower");
 
-  tree.Branch("tower_n", &tower_n_, "tower_n/I");
-  tree.Branch("tower_pt", &tower_pt_);
-  tree.Branch("tower_energy", &tower_energy_);
-  tree.Branch("tower_eta", &tower_eta_);
-  tree.Branch("tower_phi", &tower_phi_);
-  tree.Branch("tower_etEm", &tower_etEm_);
-  tree.Branch("tower_etHad", &tower_etHad_);
-  tree.Branch("tower_iEta", &tower_iEta_);
-  tree.Branch("tower_iPhi", &tower_iPhi_);
-  tree.Branch("tower_etLayers", &tower_etLayers_);
+  tree.Branch((branch_name_prefix_+"_n").c_str(), &tower_n_, (branch_name_prefix_+"_n/I").c_str());
+  tree.Branch((branch_name_prefix_+"_pt").c_str(), &tower_pt_);
+  tree.Branch((branch_name_prefix_+"_energy").c_str(), &tower_energy_);
+  tree.Branch((branch_name_prefix_+"_eta").c_str(), &tower_eta_);
+  tree.Branch((branch_name_prefix_+"_phi").c_str(), &tower_phi_);
+  tree.Branch((branch_name_prefix_+"_etEm").c_str(), &tower_etEm_);
+  tree.Branch((branch_name_prefix_+"_etHad").c_str(), &tower_etHad_);
+  tree.Branch((branch_name_prefix_+"_iEta").c_str(), &tower_iEta_);
+  tree.Branch((branch_name_prefix_+"_iPhi").c_str(), &tower_iPhi_);
+  tree.Branch((branch_name_prefix_+"_etLayers").c_str(), &tower_etLayers_);
 
 }
 
