@@ -106,11 +106,11 @@ fill(const edm::Event& e, const edm::EventSetup& es)
 
     tower_iEta_.emplace_back(tower_itr->id().iEta());
     tower_iPhi_.emplace_back(tower_itr->id().iPhi());
-    std::vector<float> et_layers;
-    et_layers.reserve(triggerTools_.lastLayerBH());
+    std::vector<float> et_layers(triggerTools_.lastLayerBH());
     for(auto tower_map: tower_maps ) {
       et_layers[tower_map.layer()-1] = tower_map.towers().find(tower_itr->id().rawId())->second.pt();
     }
+
     tower_etLayers_.push_back(et_layers);
   }
 }
