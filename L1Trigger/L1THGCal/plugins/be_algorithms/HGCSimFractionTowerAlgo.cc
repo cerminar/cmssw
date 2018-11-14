@@ -89,7 +89,6 @@ class HGCSimFractionTowerAlgo : public Algorithm<FECODEC>
         HGCalTriggerCellCalibration calibration_;
         HGCalTowerMap2DImpl towermap2D_;
         HGCalTowerMap3DImpl towermap3D_;
-
         edm::EDGetTokenT<std::vector<SimCluster>> simClusters_;
         StringCutObjectSelector<SimCluster> simClusterSelection_;
         HGCalTriggerTools triggerTools_;
@@ -97,7 +96,6 @@ class HGCSimFractionTowerAlgo : public Algorithm<FECODEC>
         std::string towerMapLabel_;
         std::string towerLabel_;
         bool debug_;
-
 };
 
 
@@ -165,8 +163,6 @@ void HGCSimFractionTowerAlgo<FECODEC,DATA>::run(const l1t::HGCFETriggerDigiColle
             } else {
               if(debug_) std::cout << "TC: " << triggercell.detId() << " hwPt: " << triggercell.hwPt() << " MIPT: " << triggercell.mipPt() << " eta: " << triggercell.eta() << " phi: " << triggercell.phi() << " selected NO!" << std::endl;
             }
-
-
         }
 
     }
