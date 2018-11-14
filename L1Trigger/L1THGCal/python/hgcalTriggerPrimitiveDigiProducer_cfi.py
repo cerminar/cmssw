@@ -104,9 +104,9 @@ L1TTriggerTowerConfig_etaphi = cms.PSet(readMappingFile=cms.bool(False),
 
 
 L1TTriggerTowerConfig_hgcroc_etaphi = cms.PSet(readMappingFile=cms.bool(True),
-                                               L1TTriggerTowerMapping=cms.FileInPath("L1Trigger/L1THGCal/data/tower_mapping_hgcroc_eta-phi_v0.txt"),
-                                               minEta=cms.double(1.41),
-                                               maxEta=cms.double(3.1),
+                                               L1TTriggerTowerMapping=cms.FileInPath("L1Trigger/L1THGCal/data/tower_mapping_hgcroc_eta-phi_v3.txt"),
+                                               minEta=cms.double(1.479),
+                                               maxEta=cms.double(3.0),
                                                minPhi=cms.double(-1*math.pi),
                                                maxPhi=cms.double(math.pi),
                                                nBinsEta=cms.int32(18),
@@ -114,6 +114,16 @@ L1TTriggerTowerConfig_hgcroc_etaphi = cms.PSet(readMappingFile=cms.bool(True),
                                                binsEta=cms.vdouble(),
                                                binsPhi=cms.vdouble())
 
+L1TTriggerTowerConfig_wafer_etaphi = cms.PSet(readMappingFile=cms.bool(True),
+                                              L1TTriggerTowerMapping=cms.FileInPath("L1Trigger/L1THGCal/data/tower_mapping_wafer_eta-phi_v3.txt"),
+                                              minEta=cms.double(1.479),
+                                              maxEta=cms.double(3.0),
+                                              minPhi=cms.double(-1*math.pi),
+                                              maxPhi=cms.double(math.pi),
+                                              nBinsEta=cms.int32(18),
+                                              nBinsPhi=cms.int32(72),
+                                              binsEta=cms.vdouble(),
+                                              binsPhi=cms.vdouble())
 
 
 towerMap2D_parValues = cms.PSet( useLayerWeights = cms.bool(False),
@@ -121,13 +131,45 @@ towerMap2D_parValues = cms.PSet( useLayerWeights = cms.bool(False),
                                  L1TTriggerTowerConfig = L1TTriggerTowerConfig_etaphi
                                  )
 
+towerMap2D_hgcroc_parValues = cms.PSet( useLayerWeights = cms.bool(False),
+                                        layerWeights = cms.vdouble(),
+                                        L1TTriggerTowerConfig = L1TTriggerTowerConfig_hgcroc_etaphi
+                                        )
+
+towerMap2D_wafer_parValues = cms.PSet( useLayerWeights = cms.bool(False),
+                                       layerWeights = cms.vdouble(),
+                                       L1TTriggerTowerConfig = L1TTriggerTowerConfig_wafer_etaphi
+                                       )
+
+
+
+tower_hgcroc_algo =  cms.PSet( AlgorithmName = cms.string('HGCTowerAlgoThreshold'),
+                               FECodec = fe_codec.clone(),
+                               calib_parameters = calib_parValues.clone(),
+                               towermap_parameters = towerMap2D_hgcroc_parValues.clone(),
+                               tcLabel = cms.string("hgcrocTowerTCs"),
+                               towerMapLabel = cms.string("hgcrocTowerMap"),
+                               towerLabel = cms.string("hgcrocTower"),
+                               )
+
+tower_wafer_algo =  cms.PSet( AlgorithmName = cms.string('HGCTowerAlgoThreshold'),
+                              FECodec = fe_codec.clone(),
+                              calib_parameters = calib_parValues.clone(),
+                              towermap_parameters = towerMap2D_wafer_parValues.clone(),
+                              tcLabel = cms.string("waferTowerTCs"),
+                              towerMapLabel = cms.string("waferTowerMap"),
+                              towerLabel = cms.string("waferTower"),
+                              )
 
 
 
 tower_algo =  cms.PSet( AlgorithmName = cms.string('HGCTowerAlgoThreshold'),
                         FECodec = fe_codec.clone(),
                         calib_parameters = calib_parValues.clone(),
-                        towermap_parameters = towerMap2D_parValues.clone()
+                        towermap_parameters = towerMap2D_parValues.clone(),
+                        tcLabel = cms.string("calibratedTriggerCellsTower" ),
+                        towerMapLabel = cms.string("towerMap"),
+                        towerLabel = cms.string("tower"),
                         )
 
 simtower_signal_algo = cms.PSet( AlgorithmName = cms.string('HGCSimFractionTowerAlgoThreshold'),
