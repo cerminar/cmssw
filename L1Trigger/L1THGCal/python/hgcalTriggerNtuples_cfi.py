@@ -90,8 +90,8 @@ ntuple_panels = cms.PSet(
 ntuple_tower = cms.PSet(
     NtupleName = cms.string('HGCalTriggerNtupleHGCTowers'),
     Towers = cms.InputTag('hgcalTriggerPrimitiveDigiProducer:tower'),
-    TowerMaps = cms.InputTag('hgcalTriggerPrimitiveDigiProducer:towerMap')
-
+    TowerMaps = cms.InputTag('hgcalTriggerPrimitiveDigiProducer:towerMap'),
+    saveLayersEt = cms.untracked.bool(True)
 )
 
 hgcalTriggerNtuplizer = cms.EDAnalyzer(
