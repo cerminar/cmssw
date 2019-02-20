@@ -4,3 +4,8 @@ ntuple_egammaEE = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleEgammaEE'),
     EgammaEE = cms.InputTag('l1EGammaEEProducer:L1EGammaCollectionBXVWithCuts')
 )
+
+ntuple_TTTracks = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtupleTrackTrigger'),
+    TTTracks = cms.InputTag("TTTracksFromTracklet", "Level1TTTracks")
+)
