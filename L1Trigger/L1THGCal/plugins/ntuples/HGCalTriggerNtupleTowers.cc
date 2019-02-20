@@ -36,6 +36,7 @@ class HGCalTriggerNtupleHGCTowers : public HGCalTriggerNtupleBase
     std::vector<std::vector<float> > tower_etLayers_;
 
     std::string branch_name_prefix_;
+    bool save_layer_et_;
 
 };
 
@@ -45,7 +46,7 @@ DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
 
 
 HGCalTriggerNtupleHGCTowers::
-HGCalTriggerNtupleHGCTowers(const edm::ParameterSet& conf):HGCalTriggerNtupleBase(conf)
+HGCalTriggerNtupleHGCTowers(const edm::ParameterSet& conf): HGCalTriggerNtupleBase(conf)
 {
 }
 
@@ -56,7 +57,7 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   towers_token_ = collector.consumes<l1t::HGCalTowerBxCollection>(conf.getParameter<edm::InputTag>("Towers"));
   tower_maps_token_ = collector.consumes<l1t::HGCalTowerMapBxCollection>(conf.getParameter<edm::InputTag>("TowerMaps"));
   branch_name_prefix_ = conf.getUntrackedParameter<std::string>("BranchNamePrefix", "tower");
-
+  save_layer_et_ = conf.getUntrackedParameter<bool>("saveLayersEt", false);
   tree.Branch((branch_name_prefix_+"_n").c_str(), &tower_n_, (branch_name_prefix_+"_n/I").c_str());
   tree.Branch((branch_name_prefix_+"_pt").c_str(), &tower_pt_);
   tree.Branch((branch_name_prefix_+"_energy").c_str(), &tower_energy_);
@@ -66,7 +67,7 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   tree.Branch((branch_name_prefix_+"_etHad").c_str(), &tower_etHad_);
   tree.Branch((branch_name_prefix_+"_iEta").c_str(), &tower_iEta_);
   tree.Branch((branch_name_prefix_+"_iPhi").c_str(), &tower_iPhi_);
-  tree.Branch((branch_name_prefix_+"_etLayers").c_str(), &tower_etLayers_);
+  if(save_layer_et_) tree.Branch((branch_name_prefix_+"_etLayers").c_str(), &tower_etLayers_);
 
 }
 
@@ -92,8 +93,16 @@ fill(const edm::Event& e, const edm::EventSetup& es)
 
   triggerTools_.eventSetup(es);
 
+  // std::vector<l1t::HGCalTower> sortedtowers(towers.size(0));
+  // std::copy(towers.begin(0), towers.end(0), sortedtowers.begin());
+  // std::sort(sortedtowers.begin(), sortedtowers.end(), [] (auto a, auto b) -> bool {return a.pt() < b.pt();} );
+
+
+
   clear();
+  // for(auto tower_itr=sortedtowers.begin(); tower_itr!=sortedtowers.end(); tower_itr++)
   for(auto tower_itr=towers.begin(0); tower_itr!=towers.end(0); tower_itr++)
+
   {
     tower_n_++;
     // physical values
@@ -106,12 +115,14 @@ fill(const edm::Event& e, const edm::EventSetup& es)
 
     tower_iEta_.emplace_back(tower_itr->id().iEta());
     tower_iPhi_.emplace_back(tower_itr->id().iPhi());
-    std::vector<float> et_layers(triggerTools_.lastLayerBH());
-    for(auto tower_map: tower_maps ) {
-      et_layers[tower_map.layer()-1] = tower_map.towers().find(tower_itr->id().rawId())->second.pt();
-    }
+    if(save_layer_et_) {
+      std::vector<float> et_layers(triggerTools_.lastLayerBH());
+      for(auto tower_map: tower_maps ) {
+        et_layers[tower_map.layer()-1] = tower_map.towers().find(tower_itr->id().rawId())->second.pt();
+      }
 
-    tower_etLayers_.push_back(et_layers);
+      tower_etLayers_.push_back(et_layers);
+    }
   }
 }
 
