@@ -22,7 +22,11 @@ class HGCalTriggerNtupleHGCMulticlusters : public HGCalTriggerNtupleBase
 
     std::unique_ptr<HGCalTriggerClusterIdentificationBase> id_;
 
+<<<<<<< HEAD
     TString prefix_;
+=======
+    std::string branch_name_prefix_;
+>>>>>>> e8e383d... add possibility to customize branch suffix
 
     int cl3d_n_ ;
     std::vector<uint32_t> cl3d_id_;
@@ -66,36 +70,34 @@ HGCalTriggerNtupleHGCMulticlusters::
 initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& collector)
 {
   multiclusters_token_ = collector.consumes<l1t::HGCalMulticlusterBxCollection>(conf.getParameter<edm::InputTag>("Multiclusters"));
-  id_ = std::unique_ptr<HGCalTriggerClusterIdentificationBase>{ HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") };
-  id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification")); 
+  id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
+  id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification"));
+  branch_name_prefix_ = conf.getUntrackedParameter<std::string>("BranchNamePrefix", "cl3d");
 
-  prefix_ = conf.getUntrackedParameter<std::string>("Prefix", "cl3d");
-
-  tree.Branch(prefix_ + "_n", &cl3d_n_, prefix_ + "_n/I");
-  tree.Branch(prefix_ + "_id", &cl3d_id_);
-  tree.Branch(prefix_ + "_pt", &cl3d_pt_);
-  tree.Branch(prefix_ + "_energy", &cl3d_energy_);
-  tree.Branch(prefix_ + "_eta", &cl3d_eta_);
-  tree.Branch(prefix_ + "_phi", &cl3d_phi_);
-  tree.Branch(prefix_ + "_clusters_n", &cl3d_clusters_n_);
-  tree.Branch(prefix_ + "_clusters_id", &cl3d_clusters_id_);
-  tree.Branch(prefix_ + "_showerlength", &cl3d_showerlength_);
-  tree.Branch(prefix_ + "_coreshowerlength", &cl3d_coreshowerlength_);
-  tree.Branch(prefix_ + "_firstlayer", &cl3d_firstlayer_);
-  tree.Branch(prefix_ + "_maxlayer", &cl3d_maxlayer_);
-  tree.Branch(prefix_ + "_seetot", &cl3d_seetot_);
-  tree.Branch(prefix_ + "_seemax", &cl3d_seemax_);
-  tree.Branch(prefix_ + "_spptot", &cl3d_spptot_);
-  tree.Branch(prefix_ + "_sppmax", &cl3d_sppmax_);
-  tree.Branch(prefix_ + "_szz", &cl3d_szz_);
-  tree.Branch(prefix_ + "_srrtot", &cl3d_srrtot_);
-  tree.Branch(prefix_ + "_srrmax", &cl3d_srrmax_);
-  tree.Branch(prefix_ + "_srrmean", &cl3d_srrmean_);
-  tree.Branch(prefix_ + "_emaxe", &cl3d_emaxe_);
-  tree.Branch(prefix_ + "_bdteg", &cl3d_bdteg_);
-  tree.Branch(prefix_ + "_hoe", &cl3d_hoe_);
-  tree.Branch(prefix_ + "_quality", &cl3d_quality_);
-
+  tree.Branch((branch_name_prefix_+"_n").c_str(), &cl3d_n_, (branch_name_prefix_+"_n/I").c_str());
+  tree.Branch((branch_name_prefix_+"_id").c_str(), &cl3d_id_);
+  tree.Branch((branch_name_prefix_+"_pt").c_str(), &cl3d_pt_);
+  tree.Branch((branch_name_prefix_+"_energy").c_str(), &cl3d_energy_);
+  tree.Branch((branch_name_prefix_+"_eta").c_str(), &cl3d_eta_);
+  tree.Branch((branch_name_prefix_+"_phi").c_str(), &cl3d_phi_);
+  tree.Branch((branch_name_prefix_+"_clusters_n").c_str(), &cl3d_clusters_n_);
+  tree.Branch((branch_name_prefix_+"_clusters_id").c_str(), &cl3d_clusters_id_);
+  tree.Branch((branch_name_prefix_+"_showerlength").c_str(), &cl3d_showerlength_);
+  tree.Branch((branch_name_prefix_+"_coreshowerlength").c_str(), &cl3d_coreshowerlength_);
+  tree.Branch((branch_name_prefix_+"_firstlayer").c_str(), &cl3d_firstlayer_);
+  tree.Branch((branch_name_prefix_+"_maxlayer").c_str(), &cl3d_maxlayer_);
+  tree.Branch((branch_name_prefix_+"_seetot").c_str(), &cl3d_seetot_);
+  tree.Branch((branch_name_prefix_+"_seemax").c_str(), &cl3d_seemax_);
+  tree.Branch((branch_name_prefix_+"_spptot").c_str(), &cl3d_spptot_);
+  tree.Branch((branch_name_prefix_+"_sppmax").c_str(), &cl3d_sppmax_);
+  tree.Branch((branch_name_prefix_+"_szz").c_str(), &cl3d_szz_);
+  tree.Branch((branch_name_prefix_+"_srrtot").c_str(), &cl3d_srrtot_);
+  tree.Branch((branch_name_prefix_+"_srrmax").c_str(), &cl3d_srrmax_);
+  tree.Branch((branch_name_prefix_+"_srrmean").c_str(), &cl3d_srrmean_);
+  tree.Branch((branch_name_prefix_+"_emaxe").c_str(), &cl3d_emaxe_);
+  tree.Branch((branch_name_prefix_+"_bdteg").c_str(), &cl3d_bdteg_);
+  tree.Branch((branch_name_prefix_+"_hoe").c_str(), &cl3d_hoe_);
+  tree.Branch((branch_name_prefix_+"_quality").c_str(), &cl3d_quality_);
 }
 
 void
