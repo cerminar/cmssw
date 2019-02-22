@@ -22,6 +22,8 @@ class HGCalTriggerNtupleHGCMulticlusters : public HGCalTriggerNtupleBase
 
     std::unique_ptr<HGCalTriggerClusterIdentificationBase> id_;
 
+    std::string branch_name_prefix_;
+
     int cl3d_n_ ;
     std::vector<uint32_t> cl3d_id_;
     std::vector<float> cl3d_pt_;
@@ -66,32 +68,32 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
   multiclusters_token_ = collector.consumes<l1t::HGCalMulticlusterBxCollection>(conf.getParameter<edm::InputTag>("Multiclusters"));
   id_.reset( HGCalTriggerClusterIdentificationFactory::get()->create("HGCalTriggerClusterIdentificationBDT") );
   id_->initialize(conf.getParameter<edm::ParameterSet>("EGIdentification"));
+  branch_name_prefix_ = conf.getUntrackedParameter<std::string>("BranchNamePrefix", "cl3d");
 
-  tree.Branch("cl3d_n", &cl3d_n_, "cl3d_n/I");
-  tree.Branch("cl3d_id", &cl3d_id_);
-  tree.Branch("cl3d_pt", &cl3d_pt_);
-  tree.Branch("cl3d_energy", &cl3d_energy_);
-  tree.Branch("cl3d_eta", &cl3d_eta_);
-  tree.Branch("cl3d_phi", &cl3d_phi_);
-  tree.Branch("cl3d_clusters_n", &cl3d_clusters_n_);
-  tree.Branch("cl3d_clusters_id", &cl3d_clusters_id_);
-  tree.Branch("cl3d_showerlength", &cl3d_showerlength_);
-  tree.Branch("cl3d_coreshowerlength", &cl3d_coreshowerlength_);
-  tree.Branch("cl3d_firstlayer", &cl3d_firstlayer_);
-  tree.Branch("cl3d_maxlayer", &cl3d_maxlayer_);
-  tree.Branch("cl3d_seetot", &cl3d_seetot_);
-  tree.Branch("cl3d_seemax", &cl3d_seemax_);
-  tree.Branch("cl3d_spptot", &cl3d_spptot_);
-  tree.Branch("cl3d_sppmax", &cl3d_sppmax_);
-  tree.Branch("cl3d_szz", &cl3d_szz_);
-  tree.Branch("cl3d_srrtot", &cl3d_srrtot_);
-  tree.Branch("cl3d_srrmax", &cl3d_srrmax_);
-  tree.Branch("cl3d_srrmean", &cl3d_srrmean_);
-  tree.Branch("cl3d_emaxe", &cl3d_emaxe_);
-  tree.Branch("cl3d_bdteg", &cl3d_bdteg_);
-  tree.Branch("cl3d_hoe", &cl3d_hoe_);
-  tree.Branch("cl3d_quality", &cl3d_quality_);
-
+  tree.Branch((branch_name_prefix_+"_n").c_str(), &cl3d_n_, (branch_name_prefix_+"_n/I").c_str());
+  tree.Branch((branch_name_prefix_+"_id").c_str(), &cl3d_id_);
+  tree.Branch((branch_name_prefix_+"_pt").c_str(), &cl3d_pt_);
+  tree.Branch((branch_name_prefix_+"_energy").c_str(), &cl3d_energy_);
+  tree.Branch((branch_name_prefix_+"_eta").c_str(), &cl3d_eta_);
+  tree.Branch((branch_name_prefix_+"_phi").c_str(), &cl3d_phi_);
+  tree.Branch((branch_name_prefix_+"_clusters_n").c_str(), &cl3d_clusters_n_);
+  tree.Branch((branch_name_prefix_+"_clusters_id").c_str(), &cl3d_clusters_id_);
+  tree.Branch((branch_name_prefix_+"_showerlength").c_str(), &cl3d_showerlength_);
+  tree.Branch((branch_name_prefix_+"_coreshowerlength").c_str(), &cl3d_coreshowerlength_);
+  tree.Branch((branch_name_prefix_+"_firstlayer").c_str(), &cl3d_firstlayer_);
+  tree.Branch((branch_name_prefix_+"_maxlayer").c_str(), &cl3d_maxlayer_);
+  tree.Branch((branch_name_prefix_+"_seetot").c_str(), &cl3d_seetot_);
+  tree.Branch((branch_name_prefix_+"_seemax").c_str(), &cl3d_seemax_);
+  tree.Branch((branch_name_prefix_+"_spptot").c_str(), &cl3d_spptot_);
+  tree.Branch((branch_name_prefix_+"_sppmax").c_str(), &cl3d_sppmax_);
+  tree.Branch((branch_name_prefix_+"_szz").c_str(), &cl3d_szz_);
+  tree.Branch((branch_name_prefix_+"_srrtot").c_str(), &cl3d_srrtot_);
+  tree.Branch((branch_name_prefix_+"_srrmax").c_str(), &cl3d_srrmax_);
+  tree.Branch((branch_name_prefix_+"_srrmean").c_str(), &cl3d_srrmean_);
+  tree.Branch((branch_name_prefix_+"_emaxe").c_str(), &cl3d_emaxe_);
+  tree.Branch((branch_name_prefix_+"_bdteg").c_str(), &cl3d_bdteg_);
+  tree.Branch((branch_name_prefix_+"_hoe").c_str(), &cl3d_hoe_);
+  tree.Branch((branch_name_prefix_+"_quality").c_str(), &cl3d_quality_);
 }
 
 void
