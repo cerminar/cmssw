@@ -115,10 +115,28 @@ process.hgcalTriggerPrimitives.remove(process.hgcalTowerMap)
 process.hgcalTriggerPrimitives.remove(process.hgcalTower)
 
 process.hgcl1tpg_step = cms.Path(process.hgcalTriggerPrimitives)
-process.ntuple_step = cms.Path(process.hgcalTriggerNtuples)
+print(process.hgcl1tpg_step)
+
+# load ntuplizer
+#process.load('L1Trigger.L1THGCalUtilities.hgcalTriggerNtuples_cff')
+#process.ntuple_multicluster_supertriggercell =  process.ntuple_multicluster.clone()
+#process.ntuple_multicluster_supertriggercell.Multiclusters = cms.InputTag('hgcalStage2SuperTriggerCell:HGCalBackendLayer2Processor3DClustering')
+#process.ntuple_multicluster_bestchoice =  process.ntuple_multicluster.clone()
+#process.ntuple_multicluster_bestchoice.Multiclusters = cms.InputTag('hgcalStage2BestChoice:HGCalBackendLayer2Processor3DClustering')
+#
+#process.hgcalTriggerNtuplizerSuperTriggerCell = process.hgcalTriggerNtuplizer.clone()
+#process.hgcalTriggerNtuplizerSuperTriggerCell.Ntuples = cms.VPSet(process.ntuple_multicluster_supertriggercell)
+#
+#process.hgcalTriggerNtuplizerBestChoice = process.hgcalTriggerNtuplizer.clone()
+#process.hgcalTriggerNtuplizerBestChoice.Ntuples = cms.VPSet(process.ntuple_multicluster_bestchoice)
+#
+#ntuples = cms.Sequence(process.hgcalTriggerNtuplizerSuperTriggerCell*process.hgcalTriggerNtuplizerBestChoice)
+#process.globalReplace("hgcalTriggerNtuples",ntuples)
+#
+#process.ntuple_step = cms.Path(process.hgcalTriggerNtuples)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.hgcl1tpg_step, process.ntuple_step)
+process.schedule = cms.Schedule(process.hgcl1tpg_step)#, process.ntuple_step)
 
 # Add early deletion of temporary data products to reduce peak memory need
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete

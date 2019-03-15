@@ -1,6 +1,9 @@
 #include "DataFormats/L1THGCal/interface/HGCalTower.h"
+#include "DataFormats/L1THGCal/interface/HGCalTowerMap.h"
+#include "DataFormats/ForwardDetId/interface/HGCalDetId.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
+#include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 #include "L1Trigger/L1THGCalUtilities/interface/HGCalTriggerNtupleBase.h"
 
 
@@ -16,8 +19,10 @@ class HGCalTriggerNtupleHGCTowers : public HGCalTriggerNtupleBase
 
   private:
     void clear() final;
+    HGCalTriggerTools triggerTools_;
 
     edm::EDGetToken towers_token_;
+    edm::EDGetToken tower_maps_token_;
 
     int tower_n_ ;
     std::vector<float> tower_pt_;
@@ -28,6 +33,10 @@ class HGCalTriggerNtupleHGCTowers : public HGCalTriggerNtupleBase
     std::vector<float> tower_etHad_;
     std::vector<int> tower_iEta_;
     std::vector<int> tower_iPhi_;
+    std::vector<std::vector<float> > tower_etLayers_;
+
+    std::string branch_name_prefix_;
+    bool save_layer_et_;
 
 };
 
@@ -37,7 +46,7 @@ DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
 
 
 HGCalTriggerNtupleHGCTowers::
-HGCalTriggerNtupleHGCTowers(const edm::ParameterSet& conf):HGCalTriggerNtupleBase(conf)
+HGCalTriggerNtupleHGCTowers(const edm::ParameterSet& conf): HGCalTriggerNtupleBase(conf)
 {
 }
 
@@ -46,16 +55,19 @@ HGCalTriggerNtupleHGCTowers::
 initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& collector)
 {
   towers_token_ = collector.consumes<l1t::HGCalTowerBxCollection>(conf.getParameter<edm::InputTag>("Towers"));
-
-  tree.Branch("tower_n", &tower_n_, "tower_n/I");
-  tree.Branch("tower_pt", &tower_pt_);
-  tree.Branch("tower_energy", &tower_energy_);
-  tree.Branch("tower_eta", &tower_eta_);
-  tree.Branch("tower_phi", &tower_phi_);
-  tree.Branch("tower_etEm", &tower_etEm_);
-  tree.Branch("tower_etHad", &tower_etHad_);
-  tree.Branch("tower_iEta", &tower_iEta_);
-  tree.Branch("tower_iPhi", &tower_iPhi_);
+  tower_maps_token_ = collector.consumes<l1t::HGCalTowerMapBxCollection>(conf.getParameter<edm::InputTag>("TowerMaps"));
+  branch_name_prefix_ = conf.getUntrackedParameter<std::string>("BranchNamePrefix", "tower");
+  save_layer_et_ = conf.getUntrackedParameter<bool>("saveLayersEt", false);
+  tree.Branch((branch_name_prefix_+"_n").c_str(), &tower_n_, (branch_name_prefix_+"_n/I").c_str());
+  tree.Branch((branch_name_prefix_+"_pt").c_str(), &tower_pt_);
+  tree.Branch((branch_name_prefix_+"_energy").c_str(), &tower_energy_);
+  tree.Branch((branch_name_prefix_+"_eta").c_str(), &tower_eta_);
+  tree.Branch((branch_name_prefix_+"_phi").c_str(), &tower_phi_);
+  tree.Branch((branch_name_prefix_+"_etEm").c_str(), &tower_etEm_);
+  tree.Branch((branch_name_prefix_+"_etHad").c_str(), &tower_etHad_);
+  tree.Branch((branch_name_prefix_+"_iEta").c_str(), &tower_iEta_);
+  tree.Branch((branch_name_prefix_+"_iPhi").c_str(), &tower_iPhi_);
+  if(save_layer_et_) tree.Branch((branch_name_prefix_+"_etLayers").c_str(), &tower_etLayers_);
 
 }
 
@@ -75,8 +87,22 @@ fill(const edm::Event& e, const edm::EventSetup& es)
   edm::ESHandle<HGCalTriggerGeometryBase> geometry;
   es.get<CaloGeometryRecord>().get(geometry);
 
+  edm::Handle<l1t::HGCalTowerMapBxCollection> towers_maps_h;
+  e.getByToken(tower_maps_token_, towers_maps_h);
+  const l1t::HGCalTowerMapBxCollection& tower_maps = *towers_maps_h;
+
+  triggerTools_.eventSetup(es);
+
+  // std::vector<l1t::HGCalTower> sortedtowers(towers.size(0));
+  // std::copy(towers.begin(0), towers.end(0), sortedtowers.begin());
+  // std::sort(sortedtowers.begin(), sortedtowers.end(), [] (auto a, auto b) -> bool {return a.pt() < b.pt();} );
+
+
+
   clear();
+  // for(auto tower_itr=sortedtowers.begin(); tower_itr!=sortedtowers.end(); tower_itr++)
   for(auto tower_itr=towers.begin(0); tower_itr!=towers.end(0); tower_itr++)
+
   {
     tower_n_++;
     // physical values
@@ -89,6 +115,14 @@ fill(const edm::Event& e, const edm::EventSetup& es)
 
     tower_iEta_.emplace_back(tower_itr->id().iEta());
     tower_iPhi_.emplace_back(tower_itr->id().iPhi());
+    if(save_layer_et_) {
+      std::vector<float> et_layers(triggerTools_.lastLayerBH());
+      for(auto tower_map: tower_maps ) {
+        et_layers[tower_map.layer()-1] = tower_map.towers().find(tower_itr->id().rawId())->second.pt();
+      }
+
+      tower_etLayers_.push_back(et_layers);
+    }
   }
 }
 
@@ -106,4 +140,5 @@ clear()
   tower_etHad_.clear();
   tower_iEta_.clear();
   tower_iPhi_.clear();
+  tower_etLayers_.clear();
 }
