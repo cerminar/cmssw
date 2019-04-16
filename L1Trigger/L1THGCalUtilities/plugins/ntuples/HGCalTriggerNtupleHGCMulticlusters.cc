@@ -22,11 +22,7 @@ class HGCalTriggerNtupleHGCMulticlusters : public HGCalTriggerNtupleBase
 
     std::unique_ptr<HGCalTriggerClusterIdentificationBase> id_;
 
-<<<<<<< HEAD
-    TString prefix_;
-=======
     std::string branch_name_prefix_;
->>>>>>> e8e383d... add possibility to customize branch suffix
 
     int cl3d_n_ ;
     std::vector<uint32_t> cl3d_id_;
