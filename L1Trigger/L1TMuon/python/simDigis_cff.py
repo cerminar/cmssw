@@ -31,15 +31,13 @@ if not (stage2L1Trigger.isChosen() or phase2_trigger.isChosen()):
 #
 # - CSC Track Finder emulator
 #
-import L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi
-simCsctfTrackDigis = L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi.csctfTrackDigis.clone(
-    SectorReceiverInput = 'simCscTriggerPrimitiveDigis:MPCSORTED',
-    DTproducer = 'simDtTriggerPrimitiveDigis'
-)
-import L1Trigger.CSCTrackFinder.csctfDigis_cfi
-simCsctfDigis = L1Trigger.CSCTrackFinder.csctfDigis_cfi.csctfDigis.clone(
-    CSCTrackProducer = 'simCsctfTrackDigis'
-)
+    import L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi
+    simCsctfTrackDigis = L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi.csctfTrackDigis.clone()
+    simCsctfTrackDigis.SectorReceiverInput = cms.untracked.InputTag( 'simCscTriggerPrimitiveDigis', 'MPCSORTED' )
+    simCsctfTrackDigis.DTproducer = 'simDtTriggerPrimitiveDigis'
+    import L1Trigger.CSCTrackFinder.csctfDigis_cfi
+    simCsctfDigis = L1Trigger.CSCTrackFinder.csctfDigis_cfi.csctfDigis.clone()
+    simCsctfDigis.CSCTrackProducer = 'simCsctfTrackDigis'
 #
 # - DT Track Finder emulator
 #
@@ -50,25 +48,23 @@ simCsctfDigis = L1Trigger.CSCTrackFinder.csctfDigis_cfi.csctfDigis.clone(
 #
 # - RPC PAC Trigger emulator
 #
-from L1Trigger.RPCTrigger.rpcTriggerDigis_cff import *
-simRpcTriggerDigis = L1Trigger.RPCTrigger.rpcTriggerDigis_cff.rpcTriggerDigis.clone(
-    label = 'simMuonRPCDigis'
-)
+    from L1Trigger.RPCTrigger.rpcTriggerDigis_cff import *
+    simRpcTriggerDigis = L1Trigger.RPCTrigger.rpcTriggerDigis_cff.rpcTriggerDigis.clone()
+    simRpcTriggerDigis.label = 'simMuonRPCDigis'
 #
 # - Global Muon Trigger emulator
 #
-import L1Trigger.GlobalMuonTrigger.gmtDigis_cfi
-simGmtDigis = L1Trigger.GlobalMuonTrigger.gmtDigis_cfi.gmtDigis.clone(
-    DTCandidates   = 'simDttfDigis:DT',
-    CSCCandidates  = 'simCsctfDigis:CSC',
-    RPCbCandidates = 'simRpcTriggerDigis:RPCb',
-    RPCfCandidates = 'simRpcTriggerDigis:RPCf',
+    import L1Trigger.GlobalMuonTrigger.gmtDigis_cfi
+    simGmtDigis = L1Trigger.GlobalMuonTrigger.gmtDigis_cfi.gmtDigis.clone()
+    simGmtDigis.DTCandidates   = cms.InputTag( 'simDttfDigis', 'DT' )
+    simGmtDigis.CSCCandidates  = cms.InputTag( 'simCsctfDigis', 'CSC' )
+    simGmtDigis.RPCbCandidates = cms.InputTag( 'simRpcTriggerDigis', 'RPCb' )
+    simGmtDigis.RPCfCandidates = cms.InputTag( 'simRpcTriggerDigis', 'RPCf' )
 #   Note: GMT requires input from calorimeter emulators, namely MipIsoData from GCT
-    MipIsoData     = 'simRctDigis'
-)
+    simGmtDigis.MipIsoData     = 'simRctDigis'
 #
 #
-SimL1TMuon = cms.Sequence(SimL1TMuonCommon + simCsctfTrackDigis + simCsctfDigis + simDttfDigis + simRpcTriggerDigis + simGmtDigis)
+    SimL1TMuon = cms.Sequence(SimL1TMuonCommon + simCsctfTrackDigis + simCsctfDigis + simDttfDigis + simRpcTriggerDigis + simGmtDigis)
 
 #
 # Stage-2 Trigger
