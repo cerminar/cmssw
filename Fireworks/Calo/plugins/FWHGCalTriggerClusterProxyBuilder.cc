@@ -32,12 +32,18 @@ private:
 
 void FWHGCalTriggerClusterProxyBuilder::build(const l1t::HGCalMulticluster &iData, unsigned int iIndex, TEveElement &oItemHolder, const FWViewContext *)
 {
-    const long layer = item()->getConfig()->value<long>("Layer");
-    const double saturation_energy = item()->getConfig()->value<double>("EnergyCutOff");
-    const bool heatmap = item()->getConfig()->value<bool>("Heatmap");
+    const auto & config = item()->getConfig();
+    const bool z_plus = config->value<bool>("Z+");
+    const bool z_minus = config->value<bool>("Z-");
 
-    const bool z_plus = item()->getConfig()->value<bool>("Z+");
-    const bool z_minus = item()->getConfig()->value<bool>("Z-");
+    int zside = HGCalTriggerDetId(iData.detId()).zside();
+    if(!z_plus & (zside > 0)) return;
+    if(!z_minus & (zside < 0)) return;
+
+    const long layer = config->value<long>("Layer");
+    const double saturation_energy = config->value<double>("EnergyCutOff");
+    const bool heatmap = config->value<bool>("Heatmap");
+
 
     bool h_hex(false);
     TEveBoxSet *hex_boxset = new TEveBoxSet();
@@ -57,23 +63,17 @@ void FWHGCalTriggerClusterProxyBuilder::build(const l1t::HGCalMulticluster &iDat
 
     const float energy = fmin(iData.energy() / (saturation_energy * 100), 1.0);
 
+    const auto &geom = item()->getGeom();
     for (const auto &t_detid : iData.constituents())
     {
         std::unordered_set<unsigned> cells = getCellsFromTriggerCell(t_detid.first);
 
         for (auto &it : cells)
         {
-            const bool z = (it >> 25) & 0x1;
 
-            // discard everything thats not at the side that we are intersted in
-            if (
-                ((z_plus & z_minus) != 1) &&
-                (((z_plus | z_minus) == 0) || !(z == z_minus || z == !z_plus)))
-                continue;
-
-            const float *corners = item()->getGeom()->getCorners(it);
-            const float *parameters = item()->getGeom()->getParameters(it);
-            const float *shapes = item()->getGeom()->getShapePars(it);
+            const float *corners = geom->getCorners(it);
+            const float *parameters = geom->getParameters(it);
+            const float *shapes = geom->getShapePars(it);
 
             if (corners == nullptr || parameters == nullptr || shapes == nullptr)
             {

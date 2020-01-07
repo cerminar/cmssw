@@ -138,7 +138,7 @@ FWTableViewManager::FWTableViewManager(FWGUIManager* iGUIMgr)
    column("hasPhi", -2, "hasPhi").
    column("hasZed", -2, "hasZed").
    column("chi2", 2, "chi2").
-   column("dof", 0, "degreesOfFreedom"); 
+   column("dof", 0, "degreesOfFreedom");
 
    table("DTRecHit1DPair").
    column("wheel", 0, "wireId.wheel").
@@ -172,7 +172,7 @@ FWTableViewManager::FWTableViewManager(FWGUIManager* iGUIMgr)
    column("et", 1, "Et").
    column("eta", 3).
    column("phi", 3);
-   
+
    table("CaloRecHit").
    column("id", TableEntry::INT,"detid.rawId").
    column("energy",3).
@@ -211,10 +211,17 @@ FWTableViewManager::FWTableViewManager(FWGUIManager* iGUIMgr)
    column("dzAssociatedPV", 3, "dzAssociatedPV()");
 
    table("l1t::HGCalTriggerCell").
-   column("pT", 1, "pt").
+   column("pt", 1).
    column("eta", 3).
    column("phi", 3).
    column("detId", 0);
+
+   table("l1t::HGCalMultiCluster").
+   column("pt", 1).
+   column("eta", 3).
+   column("phi", 3).
+   column("detId", 0);
+
 
    table("CaloParticle").
    column("eta", 3).
@@ -231,16 +238,16 @@ FWTableViewManager::~FWTableViewManager()
 //
 
 /** Define a new table for type @a name
- 
+
     @a name the typename of the object contained in the table.
 
     @returns the TableHandle for this table, which can be
-             used to create columns via the ::columns() method. 
-    All subsequent calls for method column will be 
+             used to create columns via the ::columns() method.
+    All subsequent calls for method column will be
     relative to this table.
 
     If a table with the same name is already there, its entries
-    are reset. 
+    are reset.
   */
 FWTableViewManager::TableHandle
 FWTableViewManager::table(const char *name)
@@ -249,8 +256,8 @@ FWTableViewManager::table(const char *name)
    return handle;
 }
 
-/** Define a column in the current table. 
- 
+/** Define a column in the current table.
+
     @a name to be used as header of the column.
 
     @a precision specifying the number of significant digits in the fractional part.
@@ -264,16 +271,16 @@ FWTableViewManager::TableHandle::column(const char *name, int precision, const c
    columnEntry.name = name;
    columnEntry.precision = precision;
    columnEntry.expression = expression;
-   
+
    m_specs[m_name].push_back(columnEntry);
    return *this;
 }
 
-/** Helper function to do recursive lookup of specialized 
+/** Helper function to do recursive lookup of specialized
     table description for a given type @a key.
  */
-FWTableViewManager::TableSpecs::iterator 
-FWTableViewManager::tableFormatsImpl(const edm::TypeWithDict &key) 
+FWTableViewManager::TableSpecs::iterator
+FWTableViewManager::tableFormatsImpl(const edm::TypeWithDict &key)
 {
    TableSpecs::iterator ret = m_tableFormats.find(key.name());
    if (ret != m_tableFormats.end())
@@ -281,10 +288,10 @@ FWTableViewManager::tableFormatsImpl(const edm::TypeWithDict &key)
 
    // if there is no exact match for the type, try the base classes
    edm::TypeBases bases(key);
-   for (auto const& base : bases)  
+   for (auto const& base : bases)
    {
       ret = tableFormatsImpl(edm::BaseWithDict(base).typeOf());
-      if (ret != m_tableFormats.end()) 
+      if (ret != m_tableFormats.end())
          return ret;
    }
 
@@ -292,8 +299,8 @@ FWTableViewManager::tableFormatsImpl(const edm::TypeWithDict &key)
 }
 
 /** Find the entries for a given type @a key, possibly recursively
-    searching recursively in the class hierarchy for a base class 
-    that matches. 
+    searching recursively in the class hierarchy for a base class
+    that matches.
 
     - If the recursion succeeds return the specific table.
     - Otherwise, create a dummy table with most common properties.
@@ -301,11 +308,11 @@ FWTableViewManager::tableFormatsImpl(const edm::TypeWithDict &key)
     @a key the edm::TypeWithDict of the collection for which we want
            to have the key definition.
 
-    FIXME: how about actually inspecting the type and show all the int and floats 
+    FIXME: how about actually inspecting the type and show all the int and floats
            if no description is found??
   */
 FWTableViewManager::TableSpecs::iterator
-FWTableViewManager::tableFormats(const edm::TypeWithDict &key) 
+FWTableViewManager::tableFormats(const edm::TypeWithDict &key)
 {
    static const std::string isint("int");
    static const std::string isbool("bool");
@@ -318,10 +325,10 @@ FWTableViewManager::tableFormats(const edm::TypeWithDict &key)
 
    if (ret != m_tableFormats.end())
       return ret;
-   
+
    ret = tableFormatsImpl(key); // recursive search for base classes
 
-   if (ret != m_tableFormats.end()) 
+   if (ret != m_tableFormats.end())
       return ret;
 
    TableHandle handle = table(keyType.c_str());
@@ -369,8 +376,8 @@ FWTableViewManager::tableFormats(const edm::TypeWithDict &key)
     Otherwise identical to FWTableViewManager::tableFormats(const TClass &key).
 
   */
-FWTableViewManager::TableSpecs::iterator 
-FWTableViewManager::tableFormats(const TClass &key) 
+FWTableViewManager::TableSpecs::iterator
+FWTableViewManager::tableFormats(const TClass &key)
 {
    return tableFormats(edm::TypeWithDict::byName(key.GetName()));
 }
@@ -392,9 +399,9 @@ FWTableViewManager::beingDestroyed(const FWViewBase* iView)
 {
    for(Views::iterator it = m_views.begin(), itEnd = m_views.end();
        it != itEnd;
-       ++it) 
+       ++it)
    {
-      if(it->get() == iView) 
+      if(it->get() == iView)
       {
          m_views.erase(it);
          return;
@@ -416,19 +423,19 @@ void
 FWTableViewManager::notifyViews(void)
 {
    for(size_t i = 0, e = m_views.size(); i != e; ++i)
-   { 
+   {
       FWTableView *view = m_views[i].get();
       view->updateItems();
       view->dataChanged();
-   } 
+   }
 }
 
-/** Remove @a iItem from the list 
-    
+/** Remove @a iItem from the list
+
     @a iItem the item to be removed.
 
  */
-void 
+void
 FWTableViewManager::destroyItem(const FWEventItem *iItem)
 {
    // remove the item from the list
@@ -444,7 +451,7 @@ FWTableViewManager::destroyItem(const FWEventItem *iItem)
 }
 
 /** Remove all items present in the view.
-    
+
     This should watch the FWEventItemsManager::goingToClearItems_ signal.
   */
 void
@@ -494,7 +501,7 @@ FWTableViewManager::supportedTypesAndRepresentations() const
 
 const std::string FWTableViewManager::kConfigTypeNames = "typeNames";
 
-void 
+void
 FWTableViewManager::addTo (FWConfiguration &iTo) const
 {
    // if there are views, it's the job of the first view to store
@@ -507,17 +514,17 @@ FWTableViewManager::addTo (FWConfiguration &iTo) const
    // FWTableView as well
    addToImpl(iTo);
 }
-     
-void 
+
+void
 FWTableViewManager::addToImpl(FWConfiguration &iTo) const
 {
    FWConfiguration typeNames(1);
    char prec[100];
 
-   for (TableSpecs::const_iterator 
+   for (TableSpecs::const_iterator
 	iType = m_tableFormats.begin(),
 	iType_end = m_tableFormats.end();
-	iType != iType_end; ++iType) 
+	iType != iType_end; ++iType)
    {
       const std::string &typeName = iType->first;
       typeNames.addValue(typeName);
@@ -535,7 +542,7 @@ FWTableViewManager::addToImpl(FWConfiguration &iTo) const
    iTo.addKeyValue(kConfigTypeNames, typeNames);
 }
 
-void 
+void
 FWTableViewManager::setFrom(const FWConfiguration &iFrom)
 {
    try
@@ -546,24 +553,24 @@ FWTableViewManager::setFrom(const FWConfiguration &iFrom)
          fwLog(fwlog::kWarning) << "no table column configuration stored, using defaults\n";
          return;
       }
-            
+
       //NOTE: FWTableViewTableManagers hold pointers into m_tableFormats so if we
       // clear it those pointers would be invalid
       // instead we will just clear the lists and fill them with their new values
       //m_tableFormats.clear();
-      for (FWConfiguration::StringValuesIt 
+      for (FWConfiguration::StringValuesIt
 	   iType = typeNames->stringValues()->begin(),
-	   iTypeEnd = typeNames->stringValues()->end(); 
-           iType != iTypeEnd; ++iType) 
+	   iTypeEnd = typeNames->stringValues()->end();
+           iType != iTypeEnd; ++iType)
       {
          //std::cout << "reading type " << *iType << std::endl;
 	 const FWConfiguration *columns = iFrom.valueForKey(*iType);
 	 assert(columns != nullptr);
          TableHandle handle = table(iType->c_str());
-	 for (FWConfiguration::StringValuesIt 
+	 for (FWConfiguration::StringValuesIt
 	      it = columns->stringValues()->begin(),
-	      itEnd = columns->stringValues()->end(); 
-	      it != itEnd; ++it) 
+	      itEnd = columns->stringValues()->end();
+	      it != itEnd; ++it)
          {
 	    const std::string &name = *it++;
 	    const std::string &expr = *it++;
@@ -571,8 +578,8 @@ FWTableViewManager::setFrom(const FWConfiguration &iFrom)
             handle.column(name.c_str(), prec, expr.c_str());
 	 }
       }
-   } 
-   catch (...) 
+   }
+   catch (...)
    {
       // No info about types in the configuration; this is not an
       // error, it merely means that the types are handled by the

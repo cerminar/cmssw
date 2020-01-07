@@ -18,7 +18,7 @@ protected:
       {
          iItem->getConfig()->keepEntries(true);
          iItem->getConfig()->assertParam("Layer", 0L, 0L, 52L);
-         iItem->getConfig()->assertParam("EnergyCutOff", 0.5, 0.2, 5.0);
+         iItem->getConfig()->assertParam("EnergyCutOff", 0.5, 0.2, 50.0);
          iItem->getConfig()->assertParam("Heatmap", true);
          iItem->getConfig()->assertParam("Z+", true);
          iItem->getConfig()->assertParam("Z-", true);

@@ -29,12 +29,24 @@ private:
 
 void FWHGCalTriggerCellProxyBuilder::build(const l1t::HGCalTriggerCell &iData, unsigned int iIndex, TEveElement &oItemHolder, const FWViewContext *)
 {
-    const long layer = item()->getConfig()->value<long>("Layer");
-    const double saturation_energy = item()->getConfig()->value<double>("EnergyCutOff");
-    const bool heatmap = item()->getConfig()->value<bool>("Heatmap");
+    const auto & config = item()->getConfig();
 
-    const bool z_plus = item()->getConfig()->value<bool>("Z+");
-    const bool z_minus = item()->getConfig()->value<bool>("Z-");
+    const bool z_plus = config->value<bool>("Z+");
+    const bool z_minus = config->value<bool>("Z-");
+
+    int zside = 0;
+    if(DetId(iData.detId()).det() == DetId::HGCalHSc) {
+      zside = HGCScintillatorDetId(iData.detId()).zside();
+    } else {
+      zside = HGCalTriggerDetId(iData.detId()).zside();
+    }
+    if(!z_plus & (zside > 0)) return;
+    if(!z_minus & (zside < 0)) return;
+
+    const long layer = config->value<long>("Layer");
+    const double saturation_energy = config->value<double>("EnergyCutOff");
+    const bool heatmap = config->value<bool>("Heatmap");
+
 
     bool h_hex(false);
     TEveBoxSet *hex_boxset = new TEveBoxSet();
@@ -53,23 +65,16 @@ void FWHGCalTriggerCellProxyBuilder::build(const l1t::HGCalTriggerCell &iData, u
     boxset->SetAntiFlick(true);
 
     const float energy = fmin(10*iData.energy() / saturation_energy, 1.0);
-
     std::unordered_set<unsigned> cells = getCellsFromTriggerCell(iData.detId());
 
+    const auto &geom = item()->getGeom();
     for (std::unordered_set<unsigned>::const_iterator it = cells.begin(), itEnd = cells.end();
          it != itEnd; ++it)
     {
-        const bool z = (*it >> 25) & 0x1;
 
-        // discard everything thats not at the side that we are intersted in
-        if (
-            ((z_plus & z_minus) != 1) &&
-            (((z_plus | z_minus) == 0) || !(z == z_minus || z == !z_plus)))
-            continue;
-
-        const float *corners = item()->getGeom()->getCorners(*it);
-        const float *parameters = item()->getGeom()->getParameters(*it);
-        const float *shapes = item()->getGeom()->getShapePars(*it);
+        const float *corners = geom->getCorners(*it);
+        const float *parameters = geom->getParameters(*it);
+        const float *shapes = geom->getShapePars(*it);
 
         if (corners == nullptr || parameters == nullptr || shapes == nullptr){
             continue;
