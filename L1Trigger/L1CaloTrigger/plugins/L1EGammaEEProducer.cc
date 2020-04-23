@@ -44,7 +44,7 @@ class L1EGammaEEProducer : public edm::EDProducer {
       explicit L1EGammaEEProducer(const edm::ParameterSet&);
 
    private:
-      virtual void produce(edm::Event&, const edm::EventSetup&);
+      void produce(edm::Event&, const edm::EventSetup&) override;
 
       edm::EDGetToken multiclusters_token_;
       L1EGammaEECalibrator calibrator_;
