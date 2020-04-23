@@ -1,10 +1,9 @@
-#include "L1Trigger/L1THGCalUtilities/interface/HGCalTriggerNtupleBase.h"
-
+#include "L1TCaloTriggerNtupleBase.h"
 
 #include "DataFormats/L1TCorrelator/interface/TkElectron.h"
 #include "DataFormats/L1TCorrelator/interface/TkElectronFwd.h"
 
-class L1TriggerNtupleTkElectrons : public HGCalTriggerNtupleBase
+class L1TriggerNtupleTkElectrons : public L1TCaloTriggerNtupleBase
 {
 
   public:
@@ -15,8 +14,6 @@ class L1TriggerNtupleTkElectrons : public HGCalTriggerNtupleBase
 
   private:
     void clear() final;
-    // HGCalTriggerTools triggerTools_;
-    std::string branch_name_prefix_;
 
     edm::EDGetToken tkEle_token_;
 
@@ -36,7 +33,7 @@ DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
 
 
 L1TriggerNtupleTkElectrons::
-L1TriggerNtupleTkElectrons(const edm::ParameterSet& conf):HGCalTriggerNtupleBase(conf)
+L1TriggerNtupleTkElectrons(const edm::ParameterSet& conf) : L1TCaloTriggerNtupleBase(conf)
 {
 }
 
@@ -45,15 +42,14 @@ L1TriggerNtupleTkElectrons::
 initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& collector)
 {
   tkEle_token_ = collector.consumes<l1t::TkElectronCollection>(conf.getParameter<edm::InputTag>("TkElectrons"));
-  branch_name_prefix_ = conf.getUntrackedParameter<std::string>("BranchNamePrefix", "tkEle");
 
-  tree.Branch((branch_name_prefix_+"_n").c_str(),      &tkEle_n_, (branch_name_prefix_+"_n/I").c_str());
-  tree.Branch((branch_name_prefix_+"_pt").c_str(),     &tkEle_pt_);
-  tree.Branch((branch_name_prefix_+"_energy").c_str(), &tkEle_energy_);
-  tree.Branch((branch_name_prefix_+"_eta").c_str(),    &tkEle_eta_);
-  tree.Branch((branch_name_prefix_+"_phi").c_str(),    &tkEle_phi_);
-  tree.Branch((branch_name_prefix_+"_hwQual").c_str(), &tkEle_hwQual_);
-  tree.Branch((branch_name_prefix_+"_tkIso").c_str(), &tkEle_tkIso_);
+  tree.Branch(branch_name_w_prefix("n"),      &tkEle_n_, branch_name_w_prefix("n/I"));
+  tree.Branch(branch_name_w_prefix("pt"),     &tkEle_pt_);
+  tree.Branch(branch_name_w_prefix("energy"), &tkEle_energy_);
+  tree.Branch(branch_name_w_prefix("eta"),    &tkEle_eta_);
+  tree.Branch(branch_name_w_prefix("phi"),    &tkEle_phi_);
+  tree.Branch(branch_name_w_prefix("hwQual"), &tkEle_hwQual_);
+  tree.Branch(branch_name_w_prefix("tkIso"), &tkEle_tkIso_);
 
 }
 
