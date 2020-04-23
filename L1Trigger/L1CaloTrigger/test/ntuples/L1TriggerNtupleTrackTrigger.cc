@@ -1,4 +1,3 @@
-#include "L1Trigger/L1THGCalUtilities/interface/HGCalTriggerNtupleBase.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerTools.h"
 
 #include "L1Trigger/L1TTrackMatch/interface/pTFrom2Stubs.h"
@@ -18,9 +17,10 @@
 #include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 
+#include "L1TCaloTriggerNtupleBase.h"
 
 
-class L1TriggerNtupleTrackTrigger : public HGCalTriggerNtupleBase {
+class L1TriggerNtupleTrackTrigger : public L1TCaloTriggerNtupleBase {
 
   public:
     L1TriggerNtupleTrackTrigger(const edm::ParameterSet& conf);
@@ -66,7 +66,7 @@ DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory,
 
 
 L1TriggerNtupleTrackTrigger::
-L1TriggerNtupleTrackTrigger(const edm::ParameterSet& conf):HGCalTriggerNtupleBase(conf)
+L1TriggerNtupleTrackTrigger(const edm::ParameterSet& conf):L1TCaloTriggerNtupleBase(conf)
 {
 }
 
@@ -76,21 +76,21 @@ initialize(TTree& tree, const edm::ParameterSet& conf, edm::ConsumesCollector&& 
 {
   track_token_ = collector.consumes<std::vector<TTTrack< Ref_Phase2TrackerDigi_> > >(conf.getParameter<edm::InputTag>("TTTracks"));
 
-  tree.Branch("l1track_n",       &l1track_n_, "l1track_n/I");
-  tree.Branch("l1track_pt",      &l1track_pt_);
-  tree.Branch("l1track_pt2stubs",      &l1track_pt2stubs_);
+  tree.Branch(branch_name_w_prefix("n"),       &l1track_n_, branch_name_w_prefix("n/I"));
+  tree.Branch(branch_name_w_prefix("pt"),      &l1track_pt_);
+  tree.Branch(branch_name_w_prefix("pt2stubs"),      &l1track_pt2stubs_);
 
   // tree.Branch("l1track_energy", &l1track_energy_);
-  tree.Branch("l1track_eta",     &l1track_eta_);
-  tree.Branch("l1track_phi",     &l1track_phi_);
-  tree.Branch("l1track_curv",    &l1track_curv_);
-  tree.Branch("l1track_chi2",    &l1track_chi2_);
-  tree.Branch("l1track_chi2Red",    &l1track_chi2Red_);
-  tree.Branch("l1track_nStubs",  &l1track_nStubs_);
-  tree.Branch("l1track_z0",      &l1track_z0_);
-  tree.Branch("l1track_charge",  &l1track_charge_);
-  tree.Branch("l1track_caloeta", &l1track_caloeta_);
-  tree.Branch("l1track_calophi", &l1track_calophi_);
+  tree.Branch(branch_name_w_prefix("eta"),     &l1track_eta_);
+  tree.Branch(branch_name_w_prefix("phi"),     &l1track_phi_);
+  tree.Branch(branch_name_w_prefix("curv"),    &l1track_curv_);
+  tree.Branch(branch_name_w_prefix("chi2"),    &l1track_chi2_);
+  tree.Branch(branch_name_w_prefix("chi2Red"),    &l1track_chi2Red_);
+  tree.Branch(branch_name_w_prefix("nStubs"),  &l1track_nStubs_);
+  tree.Branch(branch_name_w_prefix("z0"),      &l1track_z0_);
+  tree.Branch(branch_name_w_prefix("charge"),  &l1track_charge_);
+  tree.Branch(branch_name_w_prefix("caloeta"), &l1track_caloeta_);
+  tree.Branch(branch_name_w_prefix("calophi"), &l1track_calophi_);
 
 }
 
@@ -122,10 +122,6 @@ L1TriggerNtupleTrackTrigger::fill(const edm::Event& ev, const edm::EventSetup& e
   clear();
   for (auto trackIter = l1TTTrackHandle->begin(); trackIter != l1TTTrackHandle->end(); ++trackIter) {
     l1track_n_++;
-    // NOTE: filter on fabs(eta) in EE to reduce the size of the collection
-    if(fabs(trackIter->momentum().eta()) < 1.3) continue;
-    // physical values
-
     l1track_pt_.emplace_back(trackIter->momentum().perp());
     l1track_pt2stubs_.emplace_back(pTFrom2Stubs::pTFrom2(trackIter, tGeom));
 
