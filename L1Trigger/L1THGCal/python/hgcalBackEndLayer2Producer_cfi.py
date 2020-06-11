@@ -158,8 +158,8 @@ phase2_hgcalV10.toModify(
 
 phase2_hgcalV11.toModify(
         energy_interpretations_em,
-        layer_containment_corrs=cms.vdouble(0., 0.0, 2.0, 1.29, 0.5, 1.73, 0.5, 1.25, 1.46, 0.75, 0.68, 0.5, 1.89, 1.83, 1.71),
-        scale_correction_coeff=cms.vdouble(-41.7769, 80.5795),
+        layer_containment_corrs=cms.vdouble(0., 0.0, 1.28, 1.09, 1.0, 1.07, 1.09, 1.04, 1.0, 1.09, 1.07, 1.03, 0.93, 1.4, 1.89),
+        scale_correction_coeff=cms.vdouble(-24.96, 52.99),
         )
 
 
