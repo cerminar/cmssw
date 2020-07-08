@@ -11,6 +11,7 @@ L1TkElectrons = cms.EDProducer("L1TkElectronTrackProducer",
         TrackChi2           = cms.double(1e10), # minimum Chi2 to select tracks
         TrackMinPt          = cms.double(10.0), # minimum Pt to select tracks
 	useTwoStubsPT       = cms.bool( False ),
+        useClusterET       = cms.bool( False ),
         TrackEGammaMatchType = cms.string("PtDependentCut"),
         TrackEGammaDeltaPhi = cms.vdouble(0.07, 0.0, 0.0), # functional Delta Phi cut parameters to match Track with L1EG objects
         TrackEGammaDeltaR   = cms.vdouble(0.08, 0.0, 0.0), # functional Delta R cut parameters to match Track with L1EG objects
@@ -71,7 +72,7 @@ L1TkElectronsHGC.IsoCut = cms.double(-0.1)
 L1TkElectronsEllipticMatchHGC = L1TkElectronsHGC.clone()
 # L1TkElectronsEllipticMatchHGC.L1TrackInputTag = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks")
 L1TkElectronsEllipticMatchHGC.TrackEGammaMatchType = cms.string("EllipticalCut")
-L1TkElectronsEllipticMatchHGC.TrackEGammaDeltaEta = cms.vdouble(0.0075, 0.0075,1e10)
+L1TkElectronsEllipticMatchHGC.TrackEGammaDeltaEta = cms.vdouble(0.01, 0.01,1e10)
 L1TkElectronsEllipticMatchHGC.maxChi2IsoTracks = cms.double(100)
 L1TkElectronsEllipticMatchHGC.minNStubsIsoTracks = cms.int32(4)
 

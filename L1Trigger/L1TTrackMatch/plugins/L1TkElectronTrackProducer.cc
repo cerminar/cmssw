@@ -104,6 +104,7 @@ private:
 
   float trkQualityChi2;
   bool useTwoStubsPT;
+  bool useClusterET;  // use cluster et to extrapolate tracks
   float trkQualityPtMin;
   std::vector<double> dPhiCutoff;
   std::vector<double> dRCutoff;
@@ -144,6 +145,7 @@ L1TkElectronTrackProducer::L1TkElectronTrackProducer(const edm::ParameterSet& iC
   trkQualityChi2 = (float)iConfig.getParameter<double>("TrackChi2");
   trkQualityPtMin = (float)iConfig.getParameter<double>("TrackMinPt");
   useTwoStubsPT = iConfig.getParameter<bool>("useTwoStubsPT");
+  useClusterET = iConfig.getParameter<bool>("useClusterET");
   dPhiCutoff = iConfig.getParameter<std::vector<double> >("TrackEGammaDeltaPhi");
   dRCutoff = iConfig.getParameter<std::vector<double> >("TrackEGammaDeltaR");
   dEtaCutoff = iConfig.getParameter<std::vector<double> >("TrackEGammaDeltaEta");
@@ -213,7 +215,10 @@ void L1TkElectronTrackProducer::produce(edm::Event& iEvent, const edm::EventSetu
         double dPhi = 99.;
         double dR = 99.;
         double dEta = 99.;
-        L1TkElectronTrackMatchAlgo::doMatch(egIter, L1TrackPtr, dPhi, dR, dEta);
+        if (useClusterET)
+          L1TkElectronTrackMatchAlgo::doMatchClusterET(egIter, L1TrackPtr, dPhi, dR, dEta);
+        else
+          L1TkElectronTrackMatchAlgo::doMatch(egIter, L1TrackPtr, dPhi, dR, dEta);
         if (dR < drmin && selectMatchedTrack(dR, dPhi, dEta, trkPt, eta_ele)) {
           drmin = dR;
           itrack = itr;
