@@ -1,7 +1,6 @@
 #include "L1Trigger/L1THGCalUtilities/interface/HGCalTriggerNtupleBase.h"
 
 
-
 class L1TCaloTriggerNtupleBase : public HGCalTriggerNtupleBase
 {
 
@@ -10,9 +9,7 @@ class L1TCaloTriggerNtupleBase : public HGCalTriggerNtupleBase
                                                               branch_name_prefix_(conf.getUntrackedParameter<std::string>("BranchNamePrefix", "")) {}
     ~L1TCaloTriggerNtupleBase() override{};
 
-    char const* branch_name_w_prefix(const std::string name) const {
-      return (branch_name_prefix_ + "_" + name).c_str();
-    }
+  std::string branch_name_w_prefix(const std::string name) const { return branch_name_prefix_ + "_" + name; }
 
   private:
     std::string branch_name_prefix_;
