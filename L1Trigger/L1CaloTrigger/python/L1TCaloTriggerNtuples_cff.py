@@ -21,10 +21,6 @@ l1CaloTriggerNtuplizer.Ntuples = cms.VPSet(ntuple_event,
 
 from L1Trigger.L1CaloTrigger.ntuple_cfi import *
 
-
-
-
-
 l1CaloTriggerNtuplizer.Ntuples.append(ntuple_egammaEE)
 l1CaloTriggerNtuplizer.Ntuples.append(ntuple_egammaEB)
 l1CaloTriggerNtuplizer.Ntuples.append(ntuple_TTTracks)
@@ -32,11 +28,16 @@ l1CaloTriggerNtuplizer.Ntuples.append(ntuple_tkEleEllEE)
 l1CaloTriggerNtuplizer.Ntuples.append(ntuple_tkEleEllEB)
 
 #
-
 l1CaloTriggerNtuples = cms.Sequence(l1CaloTriggerNtuplizer)
 
 
-# from Configuration.Eras.Modifier_phase2_hgcalV9_cff import phase2_hgcalV9
-# from L1Trigger.L1THGCalUtilities.customNtuples import custom_ntuples_V9
-# modifyHgcalTriggerNtuplesWithV9Geometry_ = phase2_hgcalV9.makeProcessModifier(custom_ntuples_V9)
-#
+l1CaloTriggerNtuplizer_egOnly = hgcalTriggerNtuplizer.clone()
+l1CaloTriggerNtuplizer_egOnly.Ntuples = cms.VPSet(
+    ntuple_event,
+    ntuple_gen,
+    ntuple_egammaEE,
+    ntuple_egammaEB,
+    ntuple_TTTracks,
+    ntuple_tkEleEllEE,
+    ntuple_tkEleEllEB,
+)
