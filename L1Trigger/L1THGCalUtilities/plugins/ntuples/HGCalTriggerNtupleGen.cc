@@ -18,6 +18,8 @@
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "L1Trigger/L1THGCal/interface/HGCalTriggerGeometryBase.h"
 
+#include "CommonTools/BaseParticlePropagator/interface/BaseParticlePropagator.h"
+#include "CommonTools/BaseParticlePropagator/interface/RawParticle.h"
 // NOTE: most of this code is borrowed by https://github.com/CMS-HGCAL/reco-ntuples
 // kudos goes to the original authors. Ideally the 2 repos should be merged since they share part of the use case
 #include <memory>
@@ -355,14 +357,26 @@ void HGCalTriggerNtupleGen::fill(const edm::Event &iEvent, const edm::EventSetup
     genpart_ovy_.push_back(orig_vtx.y());
     genpart_ovz_.push_back(orig_vtx.z());
 
-    HGCal_helpers::Coordinates hitsHGCal;
-    toHGCalPropagator.propagate(myTrack.momentum(), orig_vtx, myTrack.charge(), hitsHGCal);
+    if(reachedEE > 0) {
+      HGCal_helpers::Coordinates hitsHGCal;
+      toHGCalPropagator.propagate(myTrack.momentum(), orig_vtx, myTrack.charge(), hitsHGCal);
 
-    genpart_exphi_.push_back(hitsHGCal.phi);
-    genpart_exeta_.push_back(hitsHGCal.eta);
-    genpart_exx_.push_back(hitsHGCal.x);
-    genpart_exy_.push_back(hitsHGCal.y);
+      genpart_exphi_.push_back(hitsHGCal.phi);
+      genpart_exeta_.push_back(hitsHGCal.eta);
+      genpart_exx_.push_back(hitsHGCal.x);
+      genpart_exy_.push_back(hitsHGCal.y);
+    } else {
+      BaseParticlePropagator prop = BaseParticlePropagator(RawParticle(myTrack.momentum(), orig_vtx, myTrack.charge()), 0., 0., aField_->inTesla(GlobalPoint(0, 0, 0)).z());
+      prop.propagateToEcalEntrance(false);
+      math::XYZVector point = math::XYZVector(prop.particle().vertex()) +
+                              math::XYZTLorentzVector(prop.particle().momentum()).Vect().Unit();
+      genpart_exphi_.push_back(point.phi());
+      genpart_exeta_.push_back(point.eta());
+      genpart_exx_.push_back(point.x());
+      genpart_exy_.push_back(point.y());
 
+
+    }
     genpart_fbrem_.push_back(fbrem);
     genpart_pid_.push_back(myTrack.type());
     genpart_gen_.push_back(myTrack.genpartIndex());
