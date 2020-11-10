@@ -40,4 +40,13 @@ l1CaloTriggerNtuplizer_egOnly.Ntuples = cms.VPSet(
     ntuple_TTTracks,
     ntuple_tkEleEllEE,
     ntuple_tkEleEllEB,
+    ntuple_PFegammaEE,
+    ntuple_PFegammaEENoTk,
+    ntuple_PFegammaEEHF,
+    ntuple_PFtkEleEE,
+    ntuple_PFtkEleEB,
+    ntuple_PFtkEmEE,
+    ntuple_PFtkEmEB,
+    ntuple_tkEmEB,
+    ntuple_tkEmEE
 )

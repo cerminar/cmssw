@@ -48,12 +48,16 @@ void L1TriggerNtupleEgamma::fill(const edm::Event& e, const edm::EventSetup& es)
   for (auto egee_itr = egamma_collection.begin(0); egee_itr != egamma_collection.end(0); egee_itr++) {
     egamma_n_++;
     // physical values
+    // if(fabs(egee_itr->eta()) > 4) {
+    //   std::cout << " eta: " << egee_itr->eta() << " HWqual: " << egee_itr->hwQual() << std::endl;
+    // }
     egamma_pt_.emplace_back(egee_itr->pt());
     egamma_energy_.emplace_back(egee_itr->energy());
     egamma_eta_.emplace_back(egee_itr->eta());
     egamma_phi_.emplace_back(egee_itr->phi());
     egamma_hwQual_.emplace_back(egee_itr->hwQual());
   }
+  // std::cout << branch_name_w_prefix("-") << " # EG: " << egamma_n_ << std::endl;
 }
 
 void L1TriggerNtupleEgamma::clear() {
