@@ -22,6 +22,8 @@ private:
   std::vector<float> tkEle_phi_;
   std::vector<float> tkEle_hwQual_;
   std::vector<float> tkEle_tkIso_;
+  std::vector<float> tkEle_pfIso_;
+  std::vector<float> tkEle_puppiIso_;
   std::vector<float> tkEle_tkChi2_;
   std::vector<float> tkEle_tkPt_;
 };
@@ -43,6 +45,8 @@ void L1TriggerNtupleTkElectrons::initialize(TTree& tree,
   tree.Branch(branch_name_w_prefix("phi").c_str(), &tkEle_phi_);
   tree.Branch(branch_name_w_prefix("hwQual").c_str(), &tkEle_hwQual_);
   tree.Branch(branch_name_w_prefix("tkIso").c_str(), &tkEle_tkIso_);
+  tree.Branch(branch_name_w_prefix("pfIso").c_str(), &tkEle_pfIso_);
+  tree.Branch(branch_name_w_prefix("puppiIso").c_str(), &tkEle_puppiIso_);
   tree.Branch(branch_name_w_prefix("tkChi2").c_str(), &tkEle_tkChi2_);
   tree.Branch(branch_name_w_prefix("tkPt").c_str(), &tkEle_tkPt_);
 }
@@ -63,6 +67,8 @@ void L1TriggerNtupleTkElectrons::fill(const edm::Event& e, const edm::EventSetup
     tkEle_phi_.emplace_back(tkele_itr.phi());
     tkEle_hwQual_.emplace_back(tkele_itr.EGRef()->hwQual());
     tkEle_tkIso_.emplace_back(tkele_itr.trkIsol());
+    tkEle_pfIso_.emplace_back(tkele_itr.pfIsol());
+    tkEle_puppiIso_.emplace_back(tkele_itr.puppiIsol());
     tkEle_tkChi2_.emplace_back(tkele_itr.trkPtr()->chi2());
     tkEle_tkPt_.emplace_back(tkele_itr.trkPtr()->momentum().perp());
   }
@@ -76,6 +82,8 @@ void L1TriggerNtupleTkElectrons::clear() {
   tkEle_phi_.clear();
   tkEle_hwQual_.clear();
   tkEle_tkIso_.clear();
+  tkEle_pfIso_.clear();
+  tkEle_puppiIso_.clear();
   tkEle_tkChi2_.clear();
   tkEle_tkPt_.clear();
 }
