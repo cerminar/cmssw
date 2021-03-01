@@ -68,6 +68,12 @@ ntuple_PFtkEmEE = cms.PSet(
     BranchNamePrefix = cms.untracked.string("PFtkEmEE")
 )
 
+ntuple_PFtkEmEENoTk = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtupleTkEm'),
+    TkEms = cms.InputTag("l1pfProducerHGCalNoTK", "L1TkEm"),
+    BranchNamePrefix = cms.untracked.string("PFtkEmEENoTk")
+)
+
 ntuple_PFtkEmEB = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleTkEm'),
     TkEms = cms.InputTag("l1pfProducerBarrel", "L1TkEm"),
