@@ -26,6 +26,7 @@ private:
   std::vector<float> tkEle_puppiIso_;
   std::vector<float> tkEle_tkChi2_;
   std::vector<float> tkEle_tkPt_;
+  std::vector<float> tkEle_tkZ0_;
 };
 
 DEFINE_EDM_PLUGIN(HGCalTriggerNtupleFactory, L1TriggerNtupleTkElectrons, "L1TriggerNtupleTkElectrons");
@@ -49,6 +50,7 @@ void L1TriggerNtupleTkElectrons::initialize(TTree& tree,
   tree.Branch(branch_name_w_prefix("puppiIso").c_str(), &tkEle_puppiIso_);
   tree.Branch(branch_name_w_prefix("tkChi2").c_str(), &tkEle_tkChi2_);
   tree.Branch(branch_name_w_prefix("tkPt").c_str(), &tkEle_tkPt_);
+  tree.Branch(branch_name_w_prefix("tkZ0").c_str(), &tkEle_tkZ0_);
 }
 
 void L1TriggerNtupleTkElectrons::fill(const edm::Event& e, const edm::EventSetup& es) {
@@ -59,6 +61,7 @@ void L1TriggerNtupleTkElectrons::fill(const edm::Event& e, const edm::EventSetup
 
   // triggerTools_.eventSetup(es);
   clear();
+  // std::cout << branch_name_w_prefix("") << " # ele: " << tkEle_collection.size() << std::endl;
   for (auto tkele_itr : tkEle_collection) {
     tkEle_n_++;
     tkEle_pt_.emplace_back(tkele_itr.pt());
@@ -71,6 +74,7 @@ void L1TriggerNtupleTkElectrons::fill(const edm::Event& e, const edm::EventSetup
     tkEle_puppiIso_.emplace_back(tkele_itr.puppiIsol());
     tkEle_tkChi2_.emplace_back(tkele_itr.trkPtr()->chi2());
     tkEle_tkPt_.emplace_back(tkele_itr.trkPtr()->momentum().perp());
+    tkEle_tkZ0_.emplace_back(tkele_itr.trkPtr()->POCA().z());
   }
 }
 
@@ -86,4 +90,5 @@ void L1TriggerNtupleTkElectrons::clear() {
   tkEle_puppiIso_.clear();
   tkEle_tkChi2_.clear();
   tkEle_tkPt_.clear();
+  tkEle_tkZ0_.clear();
 }
