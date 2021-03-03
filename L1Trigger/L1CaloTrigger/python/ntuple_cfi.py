@@ -15,20 +15,14 @@ ntuple_egammaEB = cms.PSet(
 
 ntuple_PFegammaEE = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleEgamma'),
-    Egamma = cms.InputTag('l1pfProducerHGCal:L1Eg'),
+    Egamma = cms.InputTag('l1tCorrelatorEG:L1EgEE'),
     BranchNamePrefix = cms.untracked.string("PFegammaEE")
 )
 
-ntuple_PFegammaEENoTk = cms.PSet(
+ntuple_PFNFegammaEE = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleEgamma'),
-    Egamma = cms.InputTag('l1pfProducerHGCalNoTK:L1Eg'),
-    BranchNamePrefix = cms.untracked.string("PFegammaEENoTk")
-)
-
-ntuple_PFegammaEEHF = cms.PSet(
-    NtupleName = cms.string('L1TriggerNtupleEgamma'),
-    Egamma = cms.InputTag('l1pfProducerHF:L1Eg'),
-    BranchNamePrefix = cms.untracked.string("PFegammaEEHF")
+    Egamma = cms.InputTag('l1ctLayer1EG:L1EgEE'),
+    BranchNamePrefix = cms.untracked.string("PFNFegammaEE")
 )
 
 
@@ -52,32 +46,52 @@ ntuple_TTTracks = cms.PSet(
 
 ntuple_PFtkEleEE = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleTkElectrons'),
-    TkElectrons = cms.InputTag("l1pfProducerHGCal","L1TkEle"),
+    TkElectrons = cms.InputTag("l1tCorrelatorEG", "L1TkEleEE"),
     BranchNamePrefix = cms.untracked.string("PFtkEleEE")
 )
 
 ntuple_PFtkEleEB = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleTkElectrons'),
-    TkElectrons = cms.InputTag("l1pfProducerBarrel","L1TkEle"),
+    TkElectrons = cms.InputTag("l1tCorrelatorEG", "L1TkEleEB"),
     BranchNamePrefix = cms.untracked.string("PFtkEleEB")
 )
 
 ntuple_PFtkEmEE = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleTkEm'),
-    TkEms = cms.InputTag("l1pfProducerHGCal", "L1TkEm"),
+    TkEms = cms.InputTag("l1tCorrelatorEG", "L1TkEmEE"),
     BranchNamePrefix = cms.untracked.string("PFtkEmEE")
 )
 
-ntuple_PFtkEmEENoTk = cms.PSet(
-    NtupleName = cms.string('L1TriggerNtupleTkEm'),
-    TkEms = cms.InputTag("l1pfProducerHGCalNoTK", "L1TkEm"),
-    BranchNamePrefix = cms.untracked.string("PFtkEmEENoTk")
-)
 
 ntuple_PFtkEmEB = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleTkEm'),
-    TkEms = cms.InputTag("l1pfProducerBarrel", "L1TkEm"),
+    TkEms = cms.InputTag("l1tCorrelatorEG", "L1TkEmEB"),
     BranchNamePrefix = cms.untracked.string("PFtkEmEB")
+)
+
+ntuple_PFNFtkEleEE = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtupleTkElectrons'),
+    TkElectrons = cms.InputTag("l1ctLayer1EG", "L1TkEleEE"),
+    BranchNamePrefix = cms.untracked.string("PFNFtkEleEE")
+)
+
+ntuple_PFNFtkEleEB = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtupleTkElectrons'),
+    TkElectrons = cms.InputTag("l1ctLayer1EG", "L1TkEleEB"),
+    BranchNamePrefix = cms.untracked.string("PFNFtkEleEB")
+)
+
+ntuple_PFNFtkEmEE = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtupleTkEm'),
+    TkEms = cms.InputTag("l1ctLayer1EG", "L1TkEmEE"),
+    BranchNamePrefix = cms.untracked.string("PFNFtkEmEE")
+)
+
+
+ntuple_PFNFtkEmEB = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtupleTkEm'),
+    TkEms = cms.InputTag("l1ctLayer1EG", "L1TkEmEB"),
+    BranchNamePrefix = cms.untracked.string("PFNFtkEmEB")
 )
 
 ntuple_tkEleEllEE = cms.PSet(
