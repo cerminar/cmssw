@@ -7,6 +7,7 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/ParticleFlowReco/interface/PFCluster.h"
+#include "DataFormats/L1TParticleFlow/interface/PFTrack.h"
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
@@ -36,6 +37,8 @@ private:
                                           double iBField);
 
   edm::EDGetToken track_token_;
+  edm::EDGetToken decoded_track_token_;
+  bool fill_decoded_pftracks;
 
   int l1track_n_;
   std::vector<float> l1track_pt_;
@@ -53,6 +56,22 @@ private:
   std::vector<float> l1track_caloeta_;
   std::vector<float> l1track_calophi_;
 
+  int pfdtk_n_;
+  std::vector<float> pfdtk_pt_;
+  std::vector<float> pfdtk_eta_;
+  std::vector<float> pfdtk_phi_;
+  std::vector<float> pfdtk_caloeta_;
+  std::vector<float> pfdtk_calophi_;
+  std::vector<float> pfdtk_z0_;
+  std::vector<float> pfdtk_simpt_;
+  std::vector<float> pfdtk_simeta_;
+  std::vector<float> pfdtk_simphi_;
+  std::vector<float> pfdtk_simcaloeta_;
+  std::vector<float> pfdtk_simcalophi_;
+  std::vector<float> pfdtk_simz0_;
+
+
+
   edm::ESWatcher<IdealMagneticFieldRecord> magfield_watcher_;
   HGCalTriggerTools triggerTools_;
 };
@@ -67,6 +86,11 @@ void L1TriggerNtupleTrackTrigger::initialize(TTree& tree,
                                              edm::ConsumesCollector&& collector) {
   track_token_ =
       collector.consumes<std::vector<TTTrack<Ref_Phase2TrackerDigi_>>>(conf.getParameter<edm::InputTag>("TTTracks"));
+
+  decoded_track_token_ = 
+    collector.consumes<std::vector<l1t::PFTrack>>(conf.getParameter<edm::InputTag>("PFDecodedTracks"));
+
+  fill_decoded_pftracks = conf.getParameter<bool>("fillPFDecodedTracks");
 
   tree.Branch(branch_name_w_prefix("n").c_str(), &l1track_n_, branch_name_w_prefix("n/I").c_str());
   tree.Branch(branch_name_w_prefix("pt").c_str(), &l1track_pt_);
@@ -83,12 +107,33 @@ void L1TriggerNtupleTrackTrigger::initialize(TTree& tree,
   tree.Branch(branch_name_w_prefix("charge").c_str(), &l1track_charge_);
   tree.Branch(branch_name_w_prefix("caloeta").c_str(), &l1track_caloeta_);
   tree.Branch(branch_name_w_prefix("calophi").c_str(), &l1track_calophi_);
+  
+  if(fill_decoded_pftracks) {
+    tree.Branch("pfdtk_n", &pfdtk_n_, "pfdtk_n/I");
+    tree.Branch("pfdtk_pt", &pfdtk_pt_);
+    tree.Branch("pfdtk_eta", &pfdtk_eta_);
+    tree.Branch("pfdtk_phi", &pfdtk_phi_);
+    tree.Branch("pfdtk_caloeta", &pfdtk_caloeta_);
+    tree.Branch("pfdtk_calophi", &pfdtk_calophi_);
+    tree.Branch("pfdtk_z0", &pfdtk_z0_);
+    tree.Branch("pfdtk_simpt", &pfdtk_simpt_);
+    tree.Branch("pfdtk_simeta", &pfdtk_simeta_);
+    tree.Branch("pfdtk_simphi", &pfdtk_simphi_);
+    tree.Branch("pfdtk_simcaloeta", &pfdtk_simcaloeta_);
+    tree.Branch("pfdtk_simcalophi", &pfdtk_simcalophi_);
+    tree.Branch("pfdtk_simz0", &pfdtk_simz0_);
+  }
+  
 }
 
 void L1TriggerNtupleTrackTrigger::fill(const edm::Event& ev, const edm::EventSetup& es) {
   // the L1Tracks
   edm::Handle<std::vector<L1TTTrackType>> l1TTTrackHandle;
   ev.getByToken(track_token_, l1TTTrackHandle);
+
+  edm::Handle<std::vector<l1t::PFTrack>> pfDecodedTrackHandle;
+  ev.getByToken(decoded_track_token_, pfDecodedTrackHandle);
+
 
   float fBz = 0;
   if (magfield_watcher_.check(es)) {
@@ -135,6 +180,37 @@ void L1TriggerNtupleTrackTrigger::fill(const edm::Event& ev, const edm::EventSet
     l1track_caloeta_.emplace_back(caloetaphi.first);
     l1track_calophi_.emplace_back(caloetaphi.second);
   }
+  
+  if(fill_decoded_pftracks) {
+    for(auto dtk: *pfDecodedTrackHandle) {
+      pfdtk_n_++;
+      pfdtk_pt_.emplace_back(dtk.pt());
+      pfdtk_eta_.emplace_back(dtk.eta());
+      pfdtk_phi_.emplace_back(dtk.phi());
+      pfdtk_caloeta_.emplace_back(dtk.caloEta());
+      pfdtk_calophi_.emplace_back(dtk.caloPhi());
+      pfdtk_z0_.emplace_back(dtk.vz());
+
+      auto tk = dtk.track();
+      
+      float z0 = tk->POCA().z();  //cm
+      int charge = tk->rInv() > 0 ? +1 : -1;
+      reco::Candidate::PolarLorentzVector p4p(
+          tk->momentum().perp(), tk->momentum().eta(), tk->momentum().phi(), 0);  // no mass ?
+      reco::Particle::LorentzVector p4(p4p.X(), p4p.Y(), p4p.Z(), p4p.E());
+      reco::Particle::Point vtx(0., 0., z0);
+
+      auto caloetaphi = propagateToCalo(p4, math::XYZTLorentzVector(0., 0., z0, 0.), charge, fBz);
+      
+      pfdtk_simpt_.emplace_back(tk->momentum().perp());
+      pfdtk_simeta_.emplace_back(tk->momentum().eta());
+      pfdtk_simphi_.emplace_back(tk->momentum().phi());
+
+      pfdtk_simcaloeta_.emplace_back(caloetaphi.first);
+      pfdtk_simcalophi_.emplace_back(caloetaphi.second);
+      pfdtk_simz0_.emplace_back(z0);
+    }  
+  }
 }
 
 void L1TriggerNtupleTrackTrigger::clear() {
@@ -152,6 +228,22 @@ void L1TriggerNtupleTrackTrigger::clear() {
   l1track_charge_.clear();
   l1track_caloeta_.clear();
   l1track_calophi_.clear();
+  
+  pfdtk_n_ = 0;
+  pfdtk_pt_.clear();
+  pfdtk_eta_.clear();
+  pfdtk_phi_.clear();
+  pfdtk_caloeta_.clear();
+  pfdtk_calophi_.clear();
+  pfdtk_z0_.clear();
+  pfdtk_simpt_.clear();
+  pfdtk_simeta_.clear();
+  pfdtk_simphi_.clear();
+  pfdtk_simcaloeta_.clear();
+  pfdtk_simcalophi_.clear();
+  pfdtk_simz0_.clear();
+
+  
 }
 
 // #include "FastSimulation/Particle/interface/RawParticle.h"
