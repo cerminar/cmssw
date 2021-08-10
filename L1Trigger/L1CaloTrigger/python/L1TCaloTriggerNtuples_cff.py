@@ -18,22 +18,19 @@ ntuple_multiclusters_hmvdr.Prefix = cms.untracked.string('HMvDR')
 
 from L1Trigger.L1CaloTrigger.ntuple_cfi import *
 
-l1CaloTriggerNtuplizer.Ntuples = cms.VPSet(ntuple_event,
-                                           ntuple_gen,
-                                           ntuple_triggercells,
-                                           ntuple_multiclusters_hmvdr,
-                                           ntuple_egammaEE,
-                                           ntuple_egammaEB,
-                                           ntuple_TTTracks,
-                                           ntuple_tkEleEllEE,
-                                           ntuple_tkEleEllEB,
-                                           ntuple_PFegammaEE,
-                                           ntuple_PFtkEleEE,
-                                           ntuple_PFtkEleEB,
-                                           ntuple_PFtkEmEE,
-                                           ntuple_PFtkEmEB,
-                                           ntuple_tkEmEB,
-                                           ntuple_tkEmEE)
+l1CaloTriggerNtuplizer.Ntuples = cms.VPSet(
+    ntuple_event,
+    ntuple_gen,
+    ntuple_triggercells,
+    ntuple_multiclusters_hmvdr,
+    ntuple_egammaEB,
+    ntuple_PFNFegammaEE,
+    ntuple_PFNFtkEleEE,
+    ntuple_PFNFtkEleEB,
+    ntuple_PFNFtkEmEE,
+    ntuple_PFNFtkEmEB,
+)
+
 
 # l1CaloTriggerNtuplizer.Ntuples.append(ntuple_egammaEE)
 # l1CaloTriggerNtuplizer.Ntuples.append(ntuple_egammaEB)
@@ -49,11 +46,11 @@ l1CaloTriggerNtuplizer_egOnly = hgcalTriggerNtuplizer.clone()
 l1CaloTriggerNtuplizer_egOnly.Ntuples = cms.VPSet(
     ntuple_event,
     ntuple_gen,
-    ntuple_egammaEE,
+    # ntuple_egammaEE,
     ntuple_egammaEB,
-    ntuple_TTTracks,
-    ntuple_tkEleEllEE,
-    ntuple_tkEleEllEB,
+    # ntuple_TTTracks,
+    # ntuple_tkEleEllEE,
+    # ntuple_tkEleEllEB,
     # ntuple_PFegammaEE,
     # ntuple_PFtkEleEE,
     # ntuple_PFtkEleEB,
@@ -64,6 +61,6 @@ l1CaloTriggerNtuplizer_egOnly.Ntuples = cms.VPSet(
     ntuple_PFNFtkEleEB,
     ntuple_PFNFtkEmEE,
     ntuple_PFNFtkEmEB,
-    ntuple_tkEmEB,
-    ntuple_tkEmEE
+    # ntuple_tkEmEB,
+    # ntuple_tkEmEE
 )
