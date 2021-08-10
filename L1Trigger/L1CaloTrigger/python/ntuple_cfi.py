@@ -29,7 +29,7 @@ ntuple_PFNFegammaEE = cms.PSet(
 ntuple_TTTracks = cms.PSet(
     NtupleName = cms.string('L1TriggerNtupleTrackTrigger'),
     TTTracks = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks"),
-    fillPFDecodedTracks = cms.bool(True),
+    fillPFDecodedTracks = cms.bool(False),
     PFDecodedTracks = cms.InputTag("l1ctLayer1HGCal", 'DecodedTK'),
     BranchNamePrefix = cms.untracked.string("l1Trk")
 )
