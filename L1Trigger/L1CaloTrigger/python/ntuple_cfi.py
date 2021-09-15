@@ -132,3 +132,9 @@ ntuple_tkIsoEleEB = cms.PSet(
     TkElectrons = cms.InputTag("L1TkIsoElectronsCrystal","EG"),
     BranchNamePrefix = cms.untracked.string("tkIsoEleEB")
 )
+
+ntuple_PFCand = cms.PSet(
+    NtupleName = cms.string('L1TriggerNtuplePFCands'),
+    L1PFObjects = cms.InputTag("l1ctLayer1","PF"),
+    BranchNamePrefix = cms.untracked.string("PFCand")
+)
