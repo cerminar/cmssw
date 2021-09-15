@@ -21,6 +21,8 @@ private:
   std::vector<float> pfCand_phi_;
   std::vector<float> pfCand_id_;
   std::vector<float> pfCand_z0_;
+  std::vector<float> pfCand_caloEta_;
+  std::vector<float> pfCand_caloPhi_;
   
   
   
@@ -44,6 +46,9 @@ void L1TriggerNtuplePFCands::initialize(TTree& tree,
   tree.Branch(branch_name_w_prefix("phi").c_str(), &pfCand_phi_);
   tree.Branch(branch_name_w_prefix("id").c_str(), &pfCand_id_);
   tree.Branch(branch_name_w_prefix("z0").c_str(), &pfCand_z0_);
+  tree.Branch(branch_name_w_prefix("caloEta").c_str(), &pfCand_caloEta_);
+  tree.Branch(branch_name_w_prefix("caloPhi").c_str(), &pfCand_caloPhi_);
+  
 }
 
 void L1TriggerNtuplePFCands::fill(const edm::Event& e, const edm::EventSetup& es) {
@@ -63,6 +68,9 @@ void L1TriggerNtuplePFCands::fill(const edm::Event& e, const edm::EventSetup& es
     pfCand_phi_.emplace_back(pfCand_itr.phi());
     pfCand_id_.emplace_back(pfCand_itr.id());
     pfCand_z0_.emplace_back(pfCand_itr.z0());
+    pfCand_caloEta_.emplace_back(pfCand_itr.caloEta());
+    pfCand_caloPhi_.emplace_back(pfCand_itr.caloPhi());
+    
   }
 }
 
@@ -74,4 +82,6 @@ void L1TriggerNtuplePFCands::clear() {
   pfCand_phi_.clear();
   pfCand_id_.clear();
   pfCand_z0_.clear();
+  pfCand_caloEta_.clear();
+  pfCand_caloPhi_.clear();
 }
