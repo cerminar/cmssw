@@ -142,10 +142,10 @@ void Phase2L1TGMTSAMuonProducer::produce(edm::Event& iEvent, const edm::EventSet
 SAMuon Phase2L1TGMTSAMuonProducer::Convertl1tMuon(const l1t::Muon& mu, const int bx_) {
   ap_uint<BITSSAQUALITY> qual = mu.hwQual();
   int charge = mu.charge() > 0 ? 0 : 1;
+  ap_uint<BITSPT> pt = round(mu.pt() / 0.03125);
+  ap_int<BITSPHI> phi = round(mu.phi() * (1 << (BITSPHI - 1)) / (M_PI));
+  ap_int<BITSETA> eta = round(mu.eta() * (1 << (BITSETA - 1)) / (M_PI));
 
-  ap_uint<BITSPT> pt = round(mu.pt() / LSBpt);
-  ap_int<BITSPHI> phi = round(mu.phi() / LSBphi);
-  ap_int<BITSETA> eta = round(mu.eta() / LSBeta);
   // FIXME: Below are not well defined in phase1 GMT
   // Using the version from Correlator for now
   ap_int<BITSSAZ0> z0 = 0;  // No tracks info in Phase 1
