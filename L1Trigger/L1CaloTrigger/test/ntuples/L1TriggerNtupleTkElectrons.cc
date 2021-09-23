@@ -68,7 +68,8 @@ void L1TriggerNtupleTkElectrons::fill(const edm::Event& e, const edm::EventSetup
     tkEle_energy_.emplace_back(tkele_itr.energy());
     tkEle_eta_.emplace_back(tkele_itr.eta());
     tkEle_phi_.emplace_back(tkele_itr.phi());
-    tkEle_hwQual_.emplace_back(tkele_itr.EGRef()->hwQual());
+    // tkEle_hwQual_.emplace_back(tkele_itr.EGRef()->hwQual());
+    tkEle_hwQual_.emplace_back(tkele_itr.hwQual());
     tkEle_tkIso_.emplace_back(tkele_itr.trkIsol());
     tkEle_pfIso_.emplace_back(tkele_itr.pfIsol());
     tkEle_puppiIso_.emplace_back(tkele_itr.puppiIsol());

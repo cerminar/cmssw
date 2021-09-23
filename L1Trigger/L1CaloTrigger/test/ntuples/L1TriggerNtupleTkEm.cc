@@ -65,7 +65,8 @@ void L1TriggerNtupleTkEm::fill(const edm::Event& e, const edm::EventSetup& es) {
     tkEm_energy_.emplace_back(tkEm_itr.energy());
     tkEm_eta_.emplace_back(tkEm_itr.eta());
     tkEm_phi_.emplace_back(tkEm_itr.phi());
-    tkEm_hwQual_.emplace_back(tkEm_itr.EGRef()->hwQual());
+    // tkEm_hwQual_.emplace_back(tkEm_itr.EGRef()->hwQual());
+    tkEm_hwQual_.emplace_back(tkEm_itr.hwQual());
     tkEm_tkIso_.emplace_back(tkEm_itr.trkIsol());
     tkEm_tkIsoPV_.emplace_back(tkEm_itr.trkIsolPV());
     tkEm_pfIso_.emplace_back(tkEm_itr.pfIsol());
