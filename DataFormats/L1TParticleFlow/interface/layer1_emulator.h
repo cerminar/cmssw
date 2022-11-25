@@ -196,6 +196,17 @@ namespace l1ct {
     // we use an index to the standalone object needed to retrieve a Ref when putting
     int sta_idx;
     float bdtScore;
+    float HoE;
+    float Srrtot;
+    float Deta;
+    float Dphi;
+    float Dpt;
+    float Meanz;
+    float Nstubs;
+    float Chi2RPhi;
+    float Chi2RZ;
+    float Chi2Bend;
+
     bool read(std::fstream &from);
     bool write(std::fstream &to) const;
     void clear() {
@@ -204,6 +215,16 @@ namespace l1ct {
       srcTrack = nullptr;
       sta_idx = -1;
       bdtScore = -999;
+      HoE = -999;
+      Srrtot = -999;
+      Deta = -999;
+      Dphi = -999;
+      Dpt = -999;
+      Meanz = -999;
+      Nstubs = -999;
+      Chi2RPhi = -999;
+      Chi2RZ = -999;
+      Chi2Bend = -999;
       clearIsoVars();
     }
 

@@ -1102,6 +1102,17 @@ void L1TCorrelatorLayer1Producer::putEgObjects(edm::Event &iEvent,
       tkele.setPFIsol(egele.floatRelIso(l1ct::EGIsoEleObjEmu::IsoType::PfIso));
       tkele.setEgBinaryWord(egele.pack());
       tkele.setCompositeBdtScore(egele.bdtScore);
+      tkele.setCompositeHoE(egele.HoE);
+      tkele.setCompositeSrrtot(egele.Srrtot);
+      tkele.setCompositeDeta(egele.Deta);
+      tkele.setCompositeDphi(egele.Dphi);
+      tkele.setCompositeDpt(egele.Dpt);
+      tkele.setCompositeMeanz(egele.Meanz);
+      tkele.setCompositeNstubs(egele.Nstubs);
+      tkele.setCompositeChi2RPhi(egele.Chi2RPhi);
+      tkele.setCompositeChi2RZ(egele.Chi2RZ);
+      tkele.setCompositeChi2Bend(egele.Chi2Bend);
+
       tkeles->push_back(tkele);
       nele_obj.push_back(tkeles->size() - 1);
     }
