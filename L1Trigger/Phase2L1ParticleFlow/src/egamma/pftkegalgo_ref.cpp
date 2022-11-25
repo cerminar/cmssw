@@ -452,6 +452,16 @@ EGIsoEleObjEmu &PFTkEGAlgoEmulator::addEGIsoEleToPF(std::vector<EGIsoEleObjEmu> 
   egiso.srcCluster = calo.src;
   egiso.srcTrack = track.src;
   egiso.bdtScore = bdtScore;
+  egiso.HoE = calo.floatHoe();
+  egiso.Srrtot = calo.floatSrrTot();
+  egiso.Deta = track.floatEta() - calo.floatEta();
+  egiso.Dphi = deltaPhi(track.floatPhi(), calo.floatPhi());
+  egiso.Dpt = track.floatPt()/calo.floatPt();
+  egiso.Meanz = calo.floatMeanZ();
+  egiso.Nstubs = track.hwStubs;
+  egiso.Chi2RPhi = 1;
+  egiso.Chi2RZ = 1;
+  egiso.Chi2Bend = 1;
   egobjs.push_back(egiso);
 
   if (debug_ > 2)
