@@ -175,7 +175,7 @@ namespace l1ct {
     inline float floatDxy(dxy_t dxy) { return dxy.to_float() * DXY_LSB; }
     inline float floatPuppiW(puppiWgt_t puppiw) { return puppiw.to_float() * PUPPIW_LSB; }
     inline float floatIso(iso_t iso) { return iso.to_float(); }
-    inline float floatSrrTot(srrtot_t srrtot) { return srrtot.to_float() / SRRTOT_SCALE; };
+    inline float floatSrrTot(srrtot_t srrtot) { return srrtot.to_float(); };
     inline float floatMeanZ(meanz_t meanz) { return meanz + MEANZ_OFFSET; };
     inline float floatHoe(hoe_t hoe) { return hoe.to_float(); };
 
