@@ -249,7 +249,27 @@ float PFTkEGAlgoEmulator::compute_composite_score(CompositeCandidate &cand,
   // Run BDT inference
   std::vector<bdt_feature_t> inputs = {tkpt, hoe, srrtot, deta, dphi, dpt, meanz, nstubs, chi2rphi, chi2rz, chi2bend};
   std::vector<bdt_score_t> bdt_score = composite_bdt_->decision_function(inputs);
-
+  bool debug=false;
+  if(debug) {
+    std::cout << "--- Cand PT: " << calo.hwPt << " eta: " << calo.floatEta() << " phi: " << calo.floatPhi() << std::endl;
+    std::cout <<   " .  hoe = " << calo.hwHoe << " float: " << calo.floatHoe() << std::endl
+              << " .  tkpt = " << tk.hwPt << " float: " << tk.floatPt() << std::endl
+              << " .  srrtot = " << calo.hwSrrTot << " float: " << calo.floatSrrTot() << std::endl
+              << " .  deta = " << tk.hwEta - calo.hwEta << " float: " << tk.floatEta() - calo.floatEta() << std::endl
+              << " .  dpt = " << tk.hwPt * calo_invPt << " float: " <<  tk.floatPt()/calo.floatPt() << std::endl
+              << " .  meanz = " << calo.hwMeanZ << " float: " << calo.floatMeanZ() << std::endl
+              << " .  dphi = " << tk.hwPhi - calo.hwPhi << " float: " << deltaPhi(tk.floatPhi(), calo.floatPhi())<< std::endl
+              << " .  nstubs = " << tk.hwStubs << std::endl
+              << " .  chi2rphi = " << tk.hwRedChi2RPhi << std::endl
+              << " .  chi2rz = " << tk.hwRedChi2RZ << std::endl
+              << " .  chi2bend = " << tk.hwRedChi2Bend << std::endl;
+    
+    std::cout << " BDT Score: " << bdt_score[0] << std::endl;
+    std::vector<bdt_feature_t> inputs_float = {tk.floatPt(), calo.floatHoe(), calo.floatSrrTot(), tk.floatEta() - calo.floatEta(), 
+    deltaPhi(tk.floatPhi(), calo.floatPhi()), tk.floatPt()/calo.floatPt(), calo.floatMeanZ(), nstubs, chi2rphi, chi2rz, chi2bend};
+    std::vector<bdt_score_t> bdt_score_float = composite_bdt_->decision_function(inputs_float);
+    std::cout << " BDT Score: (float) " << bdt_score_float[0] << std::endl;
+  }
   return bdt_score[0];
 }
 
@@ -449,12 +469,12 @@ EGIsoEleObjEmu &PFTkEGAlgoEmulator::addEGIsoEleToPF(std::vector<EGIsoEleObjEmu> 
   egiso.srcCluster = calo.src;
   egiso.srcTrack = track.src;
   egiso.bdtScore = bdtScore;
-  egiso.HoE = calo.floatHoe();
-  egiso.Srrtot = calo.floatSrrTot();
-  egiso.Deta = track.floatEta() - calo.floatEta();
-  egiso.Dphi = deltaPhi(track.floatPhi(), calo.floatPhi());
-  egiso.Dpt = track.floatPt()/calo.floatPt();
-  egiso.Meanz = calo.floatMeanZ();
+  egiso.HoE = calo.hwHoe;
+  egiso.Srrtot = calo.hwSrrTot;
+  egiso.Deta = track.hwEta - calo.hwEta ;
+  egiso.Dphi = track.hwPhi - calo.hwPhi;
+  egiso.Dpt = track.floatPt()/calo.floatPt(); // FIXME
+  egiso.Meanz = calo.hwMeanZ;
   egiso.Nstubs = track.hwStubs;
   egiso.Chi2RPhi = track.hwRedChi2RPhi;
   egiso.Chi2RZ = track.hwRedChi2RZ;
