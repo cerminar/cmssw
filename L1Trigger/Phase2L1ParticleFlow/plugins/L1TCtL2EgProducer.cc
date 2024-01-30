@@ -75,7 +75,11 @@ private:
 
   class PatternWriter {
   public:
-    PatternWriter(const edm::ParameterSet &conf) : region2link_(5), dataWriter_(nullptr) {
+    PatternWriter(const edm::ParameterSet &conf)
+        : region2link_(5),
+          dataWriter_(nullptr),
+          nEvPerFile_(conf.getParameter<uint32_t>("eventsPerFile")),
+          enventIndex_(0) {
       unsigned int nFramesPerBX = conf.getParameter<uint32_t>("nFramesPerBX");
 
       std::map<l1t::demo::LinkId, std::pair<l1t::demo::ChannelSpec, std::vector<size_t>>> channelSpecs;
@@ -138,7 +142,12 @@ private:
       unsigned int nTrailingWords;
     };
 
-    void addEvent(const l1t::demo::EventData &eventData) { dataWriter_->addEvent(eventData); }
+    void addEvent(const l1t::demo::EventData &eventData) {
+      dataWriter_->addEvent(eventData);
+      enventIndex_++;
+      if (enventIndex_ % nEvPerFile_ == 0)
+        dataWriter_->flush();
+    }
 
     void flush() { dataWriter_->flush(); }
 
@@ -151,6 +160,8 @@ private:
     std::vector<RegionLinkMetadata> region2link_;
 
     std::unique_ptr<l1t::demo::BoardDataWriter> dataWriter_;
+    uint32_t nEvPerFile_;
+    uint32_t enventIndex_;
   };
 
   template <class TT, class T>

@@ -77,6 +77,7 @@ l1tLayer2EG = cms.EDProducer(
         outputFileExtension=cms.string("txt.gz"),
         TMUX=cms.uint32(6),
         maxLinesPerFile=cms.uint32(1024),
+        eventsPerFile=cms.uint32(12),
         channels=cms.VPSet(
             cms.PSet(
                 TMUX=cms.uint32(6),
@@ -123,6 +124,7 @@ l1tLayer2EG = cms.EDProducer(
         outputFileExtension=cms.string("txt.gz"),
         TMUX=cms.uint32(6),
         maxLinesPerFile=cms.uint32(1024),
+        eventsPerFile=cms.uint32(12),
         channels=cms.VPSet(
             cms.PSet(
                 TMUX=cms.uint32(6),
