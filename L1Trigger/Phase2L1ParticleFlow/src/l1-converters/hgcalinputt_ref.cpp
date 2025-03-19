@@ -10,7 +10,8 @@ l1ct::HgcalClusterDecoderEmulator::HgcalClusterDecoderEmulator(const edm::Parame
       corrector_(pset.getParameter<std::string>("corrector"),
                  pset.getParameter<double>("correctorEmfMax"),
                  false,
-                 pset.getParameter<bool>("emulateCorrections")),
+                 pset.getParameter<bool>("emulateCorrections"),
+                 l1tpf::corrector::EmulationMode::CorrectedPt),
       emInterpScenario_(setEmInterpScenario(pset.getParameter<std::string>("emInterpScenario"))) {}
 
 edm::ParameterSetDescription l1ct::HgcalClusterDecoderEmulator::getParameterSetDescription() {

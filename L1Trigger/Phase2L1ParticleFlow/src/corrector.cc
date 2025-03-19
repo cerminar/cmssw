@@ -31,21 +31,27 @@
  * L1T firmware
  * --- */
 
-l1tpf::corrector::corrector(const std::string &filename, float emfMax, bool debug, bool emulate)
-    : emfMax_(emfMax), emulate_(emulate) {
+l1tpf::corrector::corrector(
+    const std::string &filename, float emfMax, bool debug, bool emulate, l1tpf::corrector::EmulationMode emulationMode)
+    : emfMax_(emfMax), emulate_(emulate), emulationMode_(emulationMode) {
   if (!filename.empty())
     init_(filename, "", debug, emulate);
 }
 
-l1tpf::corrector::corrector(
-    const std::string &filename, const std::string &directory, float emfMax, bool debug, bool emulate)
-    : emfMax_(emfMax), emulate_(emulate) {
+l1tpf::corrector::corrector(const std::string &filename,
+                            const std::string &directory,
+                            float emfMax,
+                            bool debug,
+                            bool emulate,
+                            l1tpf::corrector::EmulationMode emulationMode)
+    : emfMax_(emfMax), emulate_(emulate), emulationMode_(emulationMode) {
   if (!filename.empty())
     init_(filename, directory, debug, emulate);
 }
 
-l1tpf::corrector::corrector(TDirectory *src, float emfMax, bool debug, bool emulate)
-    : emfMax_(emfMax), emulate_(emulate) {
+l1tpf::corrector::corrector(
+    TDirectory *src, float emfMax, bool debug, bool emulate, l1tpf::corrector::EmulationMode emulationMode)
+    : emfMax_(emfMax), emulate_(emulate), emulationMode_(emulationMode) {
   init_(src, debug);
 }
 
@@ -76,9 +82,6 @@ void l1tpf::corrector::init_(const std::string &filename, const std::string &dir
 #endif
   }
   init_(dir, debug);
-  if (emulate)
-    initEmulation_(dir, debug);
-
   lFile->Close();
 }
 
@@ -111,6 +114,13 @@ void l1tpf::corrector::init_(TDirectory *lFile, bool debug) {
 
   is2d_ = index_->InheritsFrom("TH2");
 
+  if (emulate_)
+    initEmulation_(lFile, debug);
+  else
+    initGraphs_(lFile, debug);
+}
+
+void l1tpf::corrector::initGraphs_(TDirectory *lFile, bool debug) {
   std::unordered_map<std::string, TGraph *> graphs;
   TKey *key;
   TIter nextkey(lFile->GetListOfKeys());
@@ -156,12 +166,17 @@ void l1tpf::corrector::init_(TDirectory *lFile, bool debug) {
 }
 
 void l1tpf::corrector::initEmulation_(TDirectory *lFile, bool debug) {
+  std::string histo_base_name = "";
+  if (emulationMode_ == l1tpf::corrector::EmulationMode::Correction)
+    histo_base_name = "emul_corr_eta";
+  else if (emulationMode_ == l1tpf::corrector::EmulationMode::CorrectedPt)
+    histo_base_name = "emul_eta";
+
   std::unordered_map<std::string, TH1 *> hists;
   TKey *key;
   TIter nextkey(lFile->GetListOfKeys());
   while ((key = (TKey *)nextkey())) {
-    // FIXME: using pt or corr factor should become a configurable
-    if (strncmp(key->GetName(), "emul_corr_eta", 8) == 0) {
+    if (strncmp(key->GetName(), histo_base_name.c_str(), histo_base_name.size()) == 0) {
       TH1 *hist = (TH1 *)key->ReadObj();
       hists[key->GetName()] = hist;
     }
@@ -175,9 +190,9 @@ void l1tpf::corrector::initEmulation_(TDirectory *lFile, bool debug) {
   for (unsigned int ieta = 0; ieta < neta_; ++ieta) {
     for (unsigned int iemf = 0; iemf < nemf_; ++iemf) {
       if (is2d_) {
-        snprintf(buff, 31, "emul_corr_eta_bin%d_emf_bin%d", ieta + 1, iemf + 1);
+        snprintf(buff, 31, "%s_bin%d_emf_bin%d", histo_base_name.c_str(), ieta + 1, iemf + 1);
       } else {
-        snprintf(buff, 31, "emul_eta_bin%d", ieta + 1);
+        snprintf(buff, 31, "%s_bin%d", histo_base_name.c_str(), ieta + 1);
       }
       TH1 *hist = hists[buff];
       if (debug) {
@@ -289,7 +304,10 @@ float l1tpf::corrector::correctedPt(float pt, float emPt, float eta) const {
 #endif
     }
     ipt = hist->GetXaxis()->FindBin(pt);
-    ptcorr = hist->GetBinContent(ipt) * pt;
+    ptcorr = hist->GetBinContent(ipt);
+    if (emulationMode_ == l1tpf::corrector::EmulationMode::Correction) {
+      ptcorr = ptcorr * pt;
+    }
     // FIXME: add debug flag
     // std::cout << "[EMU] ieta: " << ieta << " iemf: " << iemf << " ipt: " << ipt-1 << "corr: " << hist->GetBinContent(ipt) << " ptcorr: " << ptcorr << std::endl;
   }
