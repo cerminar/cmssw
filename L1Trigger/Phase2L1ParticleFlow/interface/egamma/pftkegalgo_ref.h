@@ -37,7 +37,14 @@ namespace l1ct {
     std::vector<double> dPhiValues;
     float trkQualityPtMin;  // GeV
 
-    enum Algo { undefined = -1, elliptic = 0, compositeEE_v0 = 1, compositeEB_v0 = 2, compositeEE_v1 = 3 };
+    enum Algo {
+      undefined = -1,
+      elliptic = 0,
+      compositeEE_v0 = 1,
+      compositeEB_v0 = 2,
+      compositeEE_v1 = 3,
+      compositeEB_v1 = 4
+    };
 
     Algo algorithm;
     unsigned int nCompCandPerCluster;
@@ -66,13 +73,72 @@ namespace l1ct {
     EGIsoEleObjEmu::IsoType hwIsoTypeTkEle;
     EGIsoObjEmu::IsoType hwIsoTypeTkEm;
 
+    enum WPtype { score_cut = 0, binned_cut_1d = 1 };
+    class WP {
+    protected:
+      WPtype wp_type;
+
+    public:
+      WPtype getWPtype() const { return wp_type; }
+      virtual ~WP() = default;
+
+      virtual std::string getBinnedVariableName() const {
+        throw std::runtime_error("Not implemented for this WP type");
+      }
+      virtual bool apply(const id_score_t &score) const {
+        throw std::runtime_error("Not implemented for this WP type");
+      };
+      virtual bool apply(const float &var, const id_score_t &score) const {
+        throw std::runtime_error("Not implemented for this WP type");
+      };
+    };
+
+    class SimpleWP : public WP {
+    public:
+      id_score_t wp_value;
+      SimpleWP(id_score_t wp_value) : wp_value(wp_value) { wp_type = WPtype::score_cut; }
+      bool apply(const id_score_t &score) const override { return score >= wp_value; }
+    };
+
+    class BinnedWP1D : public WP {
+    public:
+      std::string binned_variable;
+      std::vector<double> bin_low_edges;
+      std::vector<id_score_t> wp_values;
+
+      BinnedWP1D(const std::string &binned_variable,
+                 const std::vector<double> &bin_low_edges,
+                 const std::vector<id_score_t> &wp_values)
+          : binned_variable(binned_variable), bin_low_edges(bin_low_edges), wp_values(wp_values) {
+        assert(bin_low_edges.size() == wp_values.size() &&
+               "The size of bin_low_edges must match the size of wp_values.");
+        wp_type = WPtype::binned_cut_1d;
+      }
+      std::string getBinnedVariableName() const override { return binned_variable; }
+      bool apply(const float &var, const id_score_t &score) const override {
+        auto it = std::upper_bound(bin_low_edges.begin(), bin_low_edges.end(), var);
+        unsigned int bin_index = it - bin_low_edges.begin() - 1;
+        return (score > id_score_t(wp_values[bin_index]));
+      };
+    };
+
+    static std::shared_ptr<WP> createWP(const id_score_t &value) { return std::make_shared<SimpleWP>(value); }
+
+    static std::shared_ptr<WP> createWP(const std::string &binned_variable,
+                                        const std::vector<double> &bin_low_edges,
+                                        const std::vector<id_score_t> &wp_values) {
+      return std::make_shared<BinnedWP1D>(binned_variable, bin_low_edges, wp_values);
+    }
+
     struct CompIDParameters {
       CompIDParameters(const edm::ParameterSet &);
-      CompIDParameters(double bdtScore_loose_wp, double bdtScore_tight_wp, const std::string &model)
-          : bdtScore_loose_wp(bdtScore_loose_wp), bdtScore_tight_wp(bdtScore_tight_wp), conifer_model(model) {}
-      const id_score_t bdtScore_loose_wp;  // Conifer score/4
-      const id_score_t bdtScore_tight_wp;  // Conifer score/4
-      const std::string conifer_model;
+      CompIDParameters(const id_score_t &, const id_score_t &, const std::string &);
+      CompIDParameters(std::shared_ptr<WP> bdtScore_loose_wp,
+                       std::shared_ptr<WP> bdtScore_tight_wp,
+                       const std::string &model);
+      std::shared_ptr<WP> bdtScore_loose_wp;  // Conifer score/4
+      std::shared_ptr<WP> bdtScore_tight_wp;  // Conifer score/4
+      std::string conifer_model;
       static edm::ParameterSetDescription getParameterSetDescription();
     };
 
@@ -148,6 +214,8 @@ namespace l1ct {
         algorithm = Algo::compositeEB_v0;
       else if (algo == 3)
         algorithm = Algo::compositeEE_v1;
+      else if (algo == 4)
+        algorithm = Algo::compositeEB_v1;
       else
         throw std::invalid_argument("[PFTkEGAlgoEmuConfig]: Unknown algorithm type: " + std::to_string(algo));
     }
@@ -185,6 +253,9 @@ namespace l1ct {
     typedef ap_fixed<30, 20, AP_RND_CONV, AP_SAT> bdt_ee_feature_t;
     typedef ap_fixed<30, 20, AP_RND_CONV, AP_SAT> bdt_ee_score_t;
 
+    typedef ap_fixed<8, 1, AP_RND_CONV, AP_SAT> bdt_eb_v1_feature_t;
+    typedef ap_fixed<11, 4, AP_RND_CONV, AP_SAT> bdt_eb_v1_score_t;
+
   private:
     void link_emCalo2emCalo(const std::vector<EmCaloObjEmu> &emcalo, std::vector<int> &emCalo2emCalo) const;
 
@@ -216,6 +287,13 @@ namespace l1ct {
                                           const std::vector<EmCaloObjEmu> &emcalo,
                                           const std::vector<TkObjEmu> &track,
                                           const PFTkEGAlgoEmuConfig::CompIDParameters &params) const;
+
+    id_score_t compute_composite_score_eb_v1(CompositeCandidate &cand,
+                                             float sumTkPt,
+                                             unsigned int nTkMatch,
+                                             const std::vector<EmCaloObjEmu> &emcalo,
+                                             const std::vector<TkObjEmu> &track,
+                                             const PFTkEGAlgoEmuConfig::CompIDParameters &params) const;
 
     id_score_t compute_composite_score_ee(CompositeCandidate &cand,
                                           float sumTkPt,
