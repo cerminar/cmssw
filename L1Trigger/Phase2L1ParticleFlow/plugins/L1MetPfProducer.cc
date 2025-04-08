@@ -14,9 +14,12 @@
 // For HLS MET Data Formats
 #include "DataFormats/L1TParticleFlow/interface/puppi.h"
 #include "DataFormats/L1TParticleFlow/interface/sums.h"
+#include "DataFormats/L1TParticleFlow/interface/layer1_emulator.h"
 
 #include "DataFormats/L1Trigger/interface/EtSum.h"
 #include "DataFormats/Math/interface/LorentzVector.h"
+
+#include "L1Trigger/Phase2L1ParticleFlow/interface/jetmet/L1PFMetEmulator.h"
 
 #include "hls4ml/emulator.h"
 
@@ -69,17 +72,21 @@ private:
 
   // HLS MET emulator objects
   bool OptMETHLS;
-  typedef ap_fixed<22, 12> proj_t;
-  typedef ap_fixed<32, 22> proj2_t;
-  typedef ap_fixed<32, 2> poly_t;
-  typedef ap_fixed<32, 2> poly2_t;
-  typedef l1ct::Sum Met;
+  // typedef ap_fixed<22, 12> proj_t;
+  // typedef ap_fixed<32, 22> proj2_t;
+  // typedef ap_fixed<32, 2> poly_t;
+  // typedef ap_fixed<32, 2> poly2_t;
+  // typedef l1ct::Sum Met;
 
   void Project(pt_t pt, phi_t phi, pxy_t& pxy, bool isX, bool debug = false) const;
   void PhiFromXY(pxy_t px, pxy_t py, phi_t& phi, bool debug = false) const;
 
-  void Get_xy(pt_t pt, phi_t phi, proj_t& px, proj_t& py) const;
-  void pxpy_to_ptphi(proj_t met_x, proj_t met_y, Met& hls_met) const;
+  // void Get_xy(pt_t pt, phi_t phi, proj_t& px, proj_t& py) const;
+  // void pxpy_to_ptphi(proj_t met_x, proj_t met_y, Met& hls_met) const;
+  void floatVector_to_PuppiObjVector(const std::vector<float>& pt, 
+                                     const std::vector<float>& phi, 
+                                     std::vector<l1ct::PuppiObjEmu>& particles) const;
+
 
 
   int EncodePdgId(int pdgId) const;
@@ -226,87 +233,106 @@ void L1MetPfProducer::CalcMetNewHLS(const std::vector<float>& pt,
                                  const std::vector<float>& phi,
                                  reco::Candidate::PolarLorentzVector& metVector) const {
 
-  proj_t hw_px = 0;
-  proj_t hw_py = 0;
-  proj_t hw_met_px = 0;
-  proj_t hw_met_py = 0;
 
-  for (uint i = 0; i < pt.size(); i++) {
-    pt_t hw_pt = min(pt[i], maxPt_);
-    phi_t hw_phi = float(TVector2::Phi_mpi_pi(phi[i]) / phiLSB_);
+  std::vector<l1ct::PuppiObjEmu> particles;
+  floatVector_to_PuppiObjVector(pt, phi, particles);
 
-    Get_xy(hw_pt, hw_phi, hw_px, hw_py);
+  l1ct::Sum hw_met;
+  puppimet_emu(particles, hw_met);
 
-    hw_met_px -= hw_px;
-    hw_met_py -= hw_py;
-  }
 
-  Met hw_met;
+  // proj_t hw_px = 0;
+  // proj_t hw_py = 0;
+  // proj_t hw_met_px = 0;
+  // proj_t hw_met_py = 0;
 
-  pxpy_to_ptphi(hw_met_px, hw_met_py, hw_met);
+  // for (uint i = 0; i < pt.size(); i++) {
+  //   pt_t hw_pt = min(pt[i], maxPt_);
+  //   phi_t hw_phi = float(TVector2::Phi_mpi_pi(phi[i]) / phiLSB_);
+
+  //   Get_xy(hw_pt, hw_phi, hw_px, hw_py);
+
+  //   hw_met_px -= hw_px;
+  //   hw_met_py -= hw_py;
+  // }
+
+  // Met hw_met;
+
+  // pxpy_to_ptphi(hw_met_px, hw_met_py, hw_met);
 
   metVector.SetPt(hw_met.hwPt.to_double());
   metVector.SetPhi(hw_met.hwPhi.to_double() * phiLSB_);
   metVector.SetEta(0);
 }
 
+void L1MetPfProducer::floatVector_to_PuppiObjVector(const std::vector<float>& pt, 
+                                                    const std::vector<float>& phi, 
+                                                    std::vector<l1ct::PuppiObjEmu>& particles) const {
+
+  for (uint i = 0; i < pt.size(); i++) {
+    l1ct::PuppiObjEmu each_particle;
+    each_particle.hwPt = pt_t(pt[i]);
+    each_particle.hwPhi = phi_t(float(TVector2::Phi_mpi_pi(phi[i]) / phiLSB_));
+    particles.push_back(each_particle);
+  }
+
+}
+
+// void L1MetPfProducer::Get_xy(pt_t pt, phi_t phi, proj_t& px, proj_t& py) const {
+//   /*
+//       Convert pt, phi to px, py
+//       Use 2nd order Polynomial interpolation for cos, sin with 16 points
+//     */
+
+//     poly2_t cos2_par0[16] = {-1.00007,-0.924181,-0.707596,-0.382902,-0.000618262,0.382137,0.707056,0.923708,1.00007,0.924181,0.707594,0.383285,0.000188727,-0.382139,-0.706719,-0.923708};
+//     poly2_t cos2_par1[16] = {9.164680268990924e-06, 0.0017064607695524156, 0.0031441321076514446, 0.004079929656016374, 0.004437063290882583, 0.004095969231842202, 0.0031107221424451436, 0.001689531075808071, -9.161756842493832e-06, -0.001706456406229286, -0.003143961938049376, -0.004103015998697129, -0.004411145151490469, -0.0040958165155326525, -0.0031310072316764474, -0.001689531075808071};
+//     poly2_t cos2_par2[16] = {9.319674765430664e-06, 7.871694899063284e-06, 5.222989318251642e-06, 2.0256106486379287e-06, -1.9299417402361656e-06, -5.35167113952279e-06, -7.740062096537953e-06, -9.348822844786505e-06, -9.319674765430664e-06, -7.871694899063284e-06, -5.225331064666252e-06, -1.780776301343235e-06, 1.6556927733433181e-06, 5.3495197789955455e-06, 7.954684107366423e-06, 9.348822844786505e-06};
+
+//     poly2_t sin2_par0[16] = {0.000524872,-0.382229,-0.706791,-0.923959,-1.00008,-0.924156,-0.707264,-0.383199,-0.000525527,0.382228,0.706792,0.923752,1.00013,0.924155,0.707535,0.3832};
+//     poly2_t sin2_par1[16] = {-0.004431478237276202, -0.00409041472149773, -0.0031267268116859314, -0.00167440343451641, 9.741773386162849e-06, 0.0017049641497188307, 0.00312406082125351, 0.0040978672774037465, 0.004431478237276202, 0.00409041472149773, 0.0031266351819002015, 0.0016868781753450394, -1.249302315254411e-05, -0.001704846339994321, -0.003140405829698437, -0.0040978672774037465};
+//     poly2_t sin2_par2[16] = {1.870674613498914e-06, 5.292404012785538e-06, 7.909829192302831e-06, 9.188746390688592e-06, 9.313525301268721e-06, 7.887020962996302e-06, 5.435897856093815e-06, 1.8358587462761668e-06, -1.870668901922293e-06, -5.292404012785538e-06, -7.908420336736317e-06, -9.320836119343602e-06, -9.284396260501616e-06, -7.88869635880513e-06, -5.262894200243701e-06, -1.835864457852788e-06};
+
+//     phi_t phi2_edges[16] = {-720, -630, -540, -450, -360, -270, -180, -90, 0, 90, 180, 270, 360, 450, 540, 630};
 
 
-void L1MetPfProducer::Get_xy(pt_t pt, phi_t phi, proj_t& px, proj_t& py) const {
-  /*
-      Convert pt, phi to px, py
-      Use 2nd order Polynomial interpolation for cos, sin with 16 points
-    */
-
-    poly2_t cos2_par0[16] = {-1.00007,-0.924181,-0.707596,-0.382902,-0.000618262,0.382137,0.707056,0.923708,1.00007,0.924181,0.707594,0.383285,0.000188727,-0.382139,-0.706719,-0.923708};
-    poly2_t cos2_par1[16] = {9.164680268990924e-06, 0.0017064607695524156, 0.0031441321076514446, 0.004079929656016374, 0.004437063290882583, 0.004095969231842202, 0.0031107221424451436, 0.001689531075808071, -9.161756842493832e-06, -0.001706456406229286, -0.003143961938049376, -0.004103015998697129, -0.004411145151490469, -0.0040958165155326525, -0.0031310072316764474, -0.001689531075808071};
-    poly2_t cos2_par2[16] = {9.319674765430664e-06, 7.871694899063284e-06, 5.222989318251642e-06, 2.0256106486379287e-06, -1.9299417402361656e-06, -5.35167113952279e-06, -7.740062096537953e-06, -9.348822844786505e-06, -9.319674765430664e-06, -7.871694899063284e-06, -5.225331064666252e-06, -1.780776301343235e-06, 1.6556927733433181e-06, 5.3495197789955455e-06, 7.954684107366423e-06, 9.348822844786505e-06};
-
-    poly2_t sin2_par0[16] = {0.000524872,-0.382229,-0.706791,-0.923959,-1.00008,-0.924156,-0.707264,-0.383199,-0.000525527,0.382228,0.706792,0.923752,1.00013,0.924155,0.707535,0.3832};
-    poly2_t sin2_par1[16] = {-0.004431478237276202, -0.00409041472149773, -0.0031267268116859314, -0.00167440343451641, 9.741773386162849e-06, 0.0017049641497188307, 0.00312406082125351, 0.0040978672774037465, 0.004431478237276202, 0.00409041472149773, 0.0031266351819002015, 0.0016868781753450394, -1.249302315254411e-05, -0.001704846339994321, -0.003140405829698437, -0.0040978672774037465};
-    poly2_t sin2_par2[16] = {1.870674613498914e-06, 5.292404012785538e-06, 7.909829192302831e-06, 9.188746390688592e-06, 9.313525301268721e-06, 7.887020962996302e-06, 5.435897856093815e-06, 1.8358587462761668e-06, -1.870668901922293e-06, -5.292404012785538e-06, -7.908420336736317e-06, -9.320836119343602e-06, -9.284396260501616e-06, -7.88869635880513e-06, -5.262894200243701e-06, -1.835864457852788e-06};
-
-    phi_t phi2_edges[16] = {-720, -630, -540, -450, -360, -270, -180, -90, 0, 90, 180, 270, 360, 450, 540, 630};
-
-
-    int phibin = 0;
-    if      (phi < phi2_edges[1]) phibin = 0;
-    else if (phi < phi2_edges[2]) phibin = 1;
-    else if (phi < phi2_edges[3]) phibin = 2;
-    else if (phi < phi2_edges[4]) phibin = 3;
-    else if (phi < phi2_edges[5]) phibin = 4;
-    else if (phi < phi2_edges[6]) phibin = 5;
-    else if (phi < phi2_edges[7]) phibin = 6;
-    else if (phi < phi2_edges[8]) phibin = 7;
-    else if (phi < phi2_edges[9]) phibin = 8;
-    else if (phi < phi2_edges[10]) phibin = 9;
-    else if (phi < phi2_edges[11]) phibin = 10;
-    else if (phi < phi2_edges[12]) phibin = 11;
-    else if (phi < phi2_edges[13]) phibin = 12;
-    else if (phi < phi2_edges[14]) phibin = 13;
-    else if (phi < phi2_edges[15]) phibin = 14;
-    else if (phi >= phi2_edges[15]) phibin = 15;
+//     int phibin = 0;
+//     if      (phi < phi2_edges[1]) phibin = 0;
+//     else if (phi < phi2_edges[2]) phibin = 1;
+//     else if (phi < phi2_edges[3]) phibin = 2;
+//     else if (phi < phi2_edges[4]) phibin = 3;
+//     else if (phi < phi2_edges[5]) phibin = 4;
+//     else if (phi < phi2_edges[6]) phibin = 5;
+//     else if (phi < phi2_edges[7]) phibin = 6;
+//     else if (phi < phi2_edges[8]) phibin = 7;
+//     else if (phi < phi2_edges[9]) phibin = 8;
+//     else if (phi < phi2_edges[10]) phibin = 9;
+//     else if (phi < phi2_edges[11]) phibin = 10;
+//     else if (phi < phi2_edges[12]) phibin = 11;
+//     else if (phi < phi2_edges[13]) phibin = 12;
+//     else if (phi < phi2_edges[14]) phibin = 13;
+//     else if (phi < phi2_edges[15]) phibin = 14;
+//     else if (phi >= phi2_edges[15]) phibin = 15;
     
-    poly_t cos_var = cos2_par0[phibin] + cos2_par1[phibin] * (phi - phi2_edges[phibin]) + cos2_par2[phibin] * (phi - phi2_edges[phibin]) * (phi - phi2_edges[phibin]);
-    poly_t sin_var = sin2_par0[phibin] + sin2_par1[phibin] * (phi - phi2_edges[phibin]) + sin2_par2[phibin] * (phi - phi2_edges[phibin]) * (phi - phi2_edges[phibin]);
-    px = pt * cos_var;
-    py = pt * sin_var;
+//     poly_t cos_var = cos2_par0[phibin] + cos2_par1[phibin] * (phi - phi2_edges[phibin]) + cos2_par2[phibin] * (phi - phi2_edges[phibin]) * (phi - phi2_edges[phibin]);
+//     poly_t sin_var = sin2_par0[phibin] + sin2_par1[phibin] * (phi - phi2_edges[phibin]) + sin2_par2[phibin] * (phi - phi2_edges[phibin]) * (phi - phi2_edges[phibin]);
+//     px = pt * cos_var;
+//     py = pt * sin_var;
 
-}
+// }
 
-void L1MetPfProducer::pxpy_to_ptphi(proj_t met_x, proj_t met_y, Met& hls_met) const {
-    // convert x, y coordinate to pt, phi coordinate using math library
+// void L1MetPfProducer::pxpy_to_ptphi(proj_t met_x, proj_t met_y, Met& hls_met) const {
+//     // convert x, y coordinate to pt, phi coordinate using math library
 
-    hls_met.clear();
-    hls_met.hwPt = hypot(met_x.to_float(), met_y.to_float());
+//     hls_met.clear();
+//     hls_met.hwPt = hypot(met_x.to_float(), met_y.to_float());
 
-    // Reduce Latency by not-using division.
-    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(atan2(met_y.to_float(), met_x.to_float())) * ap_fixed<26, 11>(229.29936)); // 720/pi
-    // out_metphi = l1ct::Scales::makeGlbPhi(hls::atan2(mety, metx));
+//     // Reduce Latency by not-using division.
+//     hls_met.hwPhi = phi_t(ap_fixed<26, 11>(atan2(met_y.to_float(), met_x.to_float())) * ap_fixed<26, 11>(229.29936)); // 720/pi
+//     // out_metphi = l1ct::Scales::makeGlbPhi(hls::atan2(mety, metx));
 
-    return;
+//     return;
 
-}
+// }
 
 void L1MetPfProducer::CalcMetHLS(const std::vector<float>& pt,
   const std::vector<float>& phi,
