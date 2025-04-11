@@ -1,5 +1,5 @@
-#ifndef L1Trigger_Phase2L1ParticleFlow_MET_h
-#define L1Trigger_Phase2L1ParticleFlow_MET_h
+#ifndef L1Trigger_Phase2L1ParticleFlow_JUMP_h
+#define L1Trigger_Phase2L1ParticleFlow_JUMP_h
 
 #include "DataFormats/L1TParticleFlow/interface/jets.h"
 #include "DataFormats/L1TParticleFlow/interface/sums.h"
@@ -13,8 +13,9 @@
 #include "ap_int.h"
 #include "ap_fixed.h"
 
-namespace L1METEmu{
-    // Define Data types for P2 L1 MET Emulator
+namespace L1JUMPEmu{
+    // Emulator for the JUMP Algorithm
+    // JUMP: Jet Uncertainty-aware MET Prediction
 
     typedef l1ct::pt_t pt_t;
     typedef l1ct::glbphi_t phi_t;
@@ -35,7 +36,7 @@ namespace L1METEmu{
         };
         
 
-    inline Particle_xy Get_xy(l1ct::PuppiObjEmu in_particle) {
+    inline Particle_xy Get_xy(l1ct::Sum in_particle) {
         /*
             Convert pt, phi to px, py
             Use 2nd order Polynomial interpolation for cos, sin with 16 points
@@ -82,15 +83,54 @@ namespace L1METEmu{
       
       }
 
+    inline void Get_dPt(l1ct::Jet jet, proj2_t &dPx_2, proj2_t &dPy_2) {
+      ap_fixed<11, 1> eta_par1[5] = {0, 0.102, 0.130, 0.103, 0.049};
+      ap_fixed<8, 5> eta_par2[5] = {0, 9.900, 13.184, 14.050, 21.763};
 
-    inline void Sum_Particles(std::vector<Particle_xy> particles_xy, Particle_xy &met_xy) {
-        met_xy.hwPx = 0;
-        met_xy.hwPy = 0;
+      eta_t eta_edges[4] = {298, 390, 573, 688};
+
+      eta_t abseta = abs(jet.hwEta.to_float());
+      int etabin = 0;
+      if ( abseta == 0.00 )             etabin = 0;
+      else if ( abseta < eta_edges[0] )  etabin = 1;
+      else if ( abseta < eta_edges[1] )  etabin = 2;
+      else if ( abseta < eta_edges[2] )  etabin = 3;
+      else if ( abseta < eta_edges[3] )  etabin = 4;
+      else etabin = 0;
       
-        for (uint i=0; i<particles_xy.size(); ++i) {
-          met_xy.hwPx -= particles_xy[i].hwPx;
-          met_xy.hwPy -= particles_xy[i].hwPy;
-        }
+      // Particle_xy dPt_xy;
+      dPx_2 = 0;
+      dPy_2 = 0;
+      l1ct::Sum jet_resolution;
+      jet_resolution.hwPt = eta_par1[etabin]*jet.hwPt + eta_par2[etabin];
+      jet_resolution.hwPhi = jet.hwPhi;
+      Particle_xy dpt_xy = Get_xy(jet_resolution);
+
+      dPx_2 = dpt_xy.hwPx * dpt_xy.hwPx;
+      dPy_2 = dpt_xy.hwPy * dpt_xy.hwPy;
+    }
+
+
+    inline void Met_dPt(std::vector<l1ct::Jet>& jets, Particle_xy &dPt) {
+      proj2_t each_dPx2 = 0;
+      proj2_t each_dPy2 = 0;
+      
+      proj2_t sum_dPx2 = 0;
+      proj2_t sum_dPy2 = 0;
+
+      dPt.hwPx = 0;
+      dPt.hwPy = 0;
+      
+      for (uint i=0; i < jets.size(); i++){
+        Get_dPt(jets[i], each_dPx2, each_dPy2);
+        sum_dPx2 += each_dPx2;
+        sum_dPy2 += each_dPy2;
+      }
+
+      dPt.hwPx = sqrt(sum_dPx2.to_float());
+      dPt.hwPy = sqrt(sum_dPy2.to_float());
+
+
       }
       
 
@@ -115,17 +155,18 @@ namespace L1METEmu{
       
 }
 
-inline void puppimet_emu(std::vector<l1ct::PuppiObjEmu> particles, l1ct::Sum& out_met) {
+inline void JUMP_emu(l1ct::Sum inMet, std::vector<l1ct::Jet>& jets, l1ct::Sum& outMet) {
   
-    std::vector<L1METEmu::Particle_xy> particles_xy;
+    L1JUMPEmu::Particle_xy inMet_xy = L1JUMPEmu::Get_xy(inMet);
 
-    for (uint i=0; i < particles.size(); i++){
-        particles_xy.push_back(L1METEmu::Get_xy(particles[i]));
-    }
+    L1JUMPEmu::Particle_xy dPt;
+    L1JUMPEmu::Met_dPt(jets, dPt);
 
-    L1METEmu::Particle_xy met_xy;
-    L1METEmu::Sum_Particles(particles_xy, met_xy);
-    L1METEmu::pxpy_to_ptphi(met_xy, out_met);
+    L1JUMPEmu::Particle_xy outMet_xy;
+    outMet_xy.hwPx = (inMet_xy.hwPx > 0) ? inMet_xy.hwPx + dPt.hwPx : inMet_xy.hwPx - dPt.hwPx;
+    outMet_xy.hwPy = (inMet_xy.hwPy > 0) ? inMet_xy.hwPy + dPt.hwPy : inMet_xy.hwPy - dPt.hwPy;
+
+    L1JUMPEmu::pxpy_to_ptphi(outMet_xy, outMet);
 
     return;
   }
