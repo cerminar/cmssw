@@ -457,31 +457,22 @@ id_score_t PFTkEGAlgoEmulator::compute_composite_score_eb_v1(CompositeCandidate 
                                                              const std::vector<EmCaloObjEmu> &emcalo,
                                                              const std::vector<TkObjEmu> &track,
                                                              const PFTkEGAlgoEmuConfig::CompIDParameters &params) const {
-#ifdef CMSSW_GIT_HASH
   // NOTE: not yet ready for HLS testbench
   // Get the cluster/track objects that form the composite candidate
   const auto &calo = emcalo[cand.cluster_idx];
   const auto &tk = track[cand.track_idx];
-  const l1tp2::CaloCrystalCluster *crycl = dynamic_cast<const l1tp2::CaloCrystalCluster *>(calo.src);
 
   // Prepare the input features
-  // FIXME: use the EmCaloObj and TkObj to get all the features
-  // FIXME: make sure that all input features end up in the PFCluster and PFTrack objects with the right precision
-
-  // FIXME: 16 bit estimate for the inversion is approximate
-  ap_ufixed<16, 0> calo_invPt = l1ct::invert_with_shift<pt_t, ap_ufixed<16, 0>, 1024>(calo.hwPt);
   // NOTE: this could be computed once per cluster and passed directly to the function
   ap_ufixed<16, 0> tk_invPt = l1ct::invert_with_shift<pt_t, ap_ufixed<16, 0>, 1024>(tk.hwPt);
 
   constexpr std::array<float, 1 << l1ct::redChi2Bin_t::width> chi2RPhiBins = {
       {0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 10.0, 15.0, 20.0, 35.0, 60.0, 200.0}};
 
-  typedef ap_ufixed<6, 0, AP_RND_CONV, AP_SAT> calo_ratio_t;
-
   float cl_pt = calo.floatPt();
   //This two ratios will be computed in the calotrigger and passed to the CTL1 in 6 bits
-  float cl_ss = static_cast<calo_ratio_t>(crycl->e2x5() / crycl->e5x5());
-  float cl_relIso = static_cast<calo_ratio_t>((iso_t(crycl->isolation()) * calo_invPt) >> 4);
+  float cl_ss = emcalo[cand.cluster_idx].hwShowerShape.to_float();
+  float cl_relIso = emcalo[cand.cluster_idx].hwRelIso.to_float();
   float cl_staWP = calo.hwEmID & 0x1;
   float cl_looseTkWP = (calo.hwEmID & 0x2) == 0x2;
   float tk_chi2RPhi = chi2RPhiBins[tk.hwRedChi2RPhi.to_int()];
@@ -519,9 +510,6 @@ id_score_t PFTkEGAlgoEmulator::compute_composite_score_eb_v1(CompositeCandidate 
   auto *composite_bdt_eb_ = static_cast<conifer::BDT<bdt_eb_v1_feature_t, bdt_eb_v1_score_t, false> *>(model_);
   std::vector<bdt_eb_v1_score_t> bdt_score = composite_bdt_eb_->decision_function(inputs);
   return bdt_score[0] / 8;  // normalize to [-1,1]
-#else
-  return 0;
-#endif
 }
 
 id_score_t PFTkEGAlgoEmulator::compute_composite_score_ee(CompositeCandidate &cand,

@@ -64,7 +64,7 @@ namespace l1ct {
     static const int BITWIDTH_ENDCAP_SLIM =
         pt_t::width + eta_t::width + phi_t::width + pt_t::width + emid_t::width + id_prob_t::width + id_prob_t::width;
 
-    static const int BITWIDTH_BARREL = BITWIDTH_BARREL_SLIM;  // FIXME: add barrel isolation
+    static const int BITWIDTH_BARREL = BITWIDTH_BARREL_SLIM;
     static const int BITWIDTH_ENDCAP = BITWIDTH_ENDCAP_SLIM + srrtot_t::width + meanz_t::width + hoe_t::width;
 
     inline ap_uint<BITWIDTH_ENDCAP> pack_endcap() const {
@@ -172,6 +172,8 @@ namespace l1ct {
     eta_t hwEta;  // relative to the region center, at calo
     phi_t hwPhi;  // relative to the region center, at calo
     emid_t hwEmID;
+    shower_shape_t hwShowerShape;
+    rel_iso_t hwRelIso;
     srrtot_t hwSrrTot;
     meanz_t hwMeanZ;
     hoe_t hwHoe;
@@ -180,7 +182,8 @@ namespace l1ct {
 
     inline bool operator==(const EmCaloObj &other) const {
       return hwPt == other.hwPt && hwEta == other.hwEta && hwPhi == other.hwPhi && hwPtErr == other.hwPtErr &&
-             hwEmID == other.hwEmID && hwSrrTot == other.hwSrrTot && hwMeanZ == other.hwMeanZ && hwHoe == other.hwHoe &&
+             hwEmID == other.hwEmID && hwShowerShape == other.hwShowerShape && hwRelIso == other.hwRelIso &&
+             hwSrrTot == other.hwSrrTot && hwMeanZ == other.hwMeanZ && hwHoe == other.hwHoe &&
              hwPiProb == other.hwPiProb && hwEmProb == other.hwEmProb;
     }
 
@@ -193,6 +196,8 @@ namespace l1ct {
       hwEta = 0;
       hwPhi = 0;
       hwEmID = 0;
+      hwShowerShape = 0;
+      hwRelIso = 0;
       hwSrrTot = 0;
       hwMeanZ = 0;
       hwHoe = 0;
@@ -211,6 +216,8 @@ namespace l1ct {
     float floatPtErr() const { return Scales::floatPt(hwPtErr); }
     float floatEta() const { return Scales::floatEta(hwEta); }
     float floatPhi() const { return Scales::floatPhi(hwPhi); }
+    float floatShowerShape() const { return Scales::floatShoweShape(hwShowerShape); }
+    float floatRelIso() const { return Scales::floatRelIso(hwRelIso); }
     float floatSrrTot() const { return Scales::floatSrrTot(hwSrrTot); };
     float floatMeanZ() const { return Scales::floatMeanZ(hwMeanZ); };
     float floatHoe() const { return Scales::floatHoe(hwHoe); };
@@ -222,7 +229,7 @@ namespace l1ct {
     static const int BITWIDTH_ENDCAP_SLIM =
         pt_t::width + pt_t::width + eta_t::width + phi_t::width + emid_t::width + id_prob_t::width + id_prob_t::width;
 
-    static const int BITWIDTH_BARREL = BITWIDTH_BARREL_SLIM;  // FIXME: add barrel isolation
+    static const int BITWIDTH_BARREL = BITWIDTH_BARREL_SLIM + shower_shape_t::width + rel_iso_t::width;
     static const int BITWIDTH_ENDCAP = BITWIDTH_ENDCAP_SLIM + srrtot_t::width + meanz_t::width + hoe_t::width;
 
     inline ap_uint<BITWIDTH_ENDCAP> pack_endcap() const {
@@ -251,6 +258,8 @@ namespace l1ct {
       pack_into_bits(ret, start, hwPhi);
       pack_into_bits(ret, start, hwPtErr);
       pack_into_bits(ret, start, hwEmID);
+      pack_into_bits(ret, start, hwShowerShape);
+      pack_into_bits(ret, start, hwRelIso);
       return ret;
     }
 
@@ -264,6 +273,8 @@ namespace l1ct {
       unpack_from_bits(src, start, ret.hwPhi);
       unpack_from_bits(src, start, ret.hwPtErr);
       unpack_from_bits(src, start, ret.hwEmID);
+      unpack_from_bits(src, start, ret.hwShowerShape);
+      unpack_from_bits(src, start, ret.hwRelIso);
       return ret;
     }
 
@@ -289,7 +300,8 @@ namespace l1ct {
     // The firmware implementation should actually use the specific pack/unpack implementations
 
     static const int BITWIDTH = pt_t::width + pt_t::width + eta_t::width + phi_t::width + emid_t::width +
-                                id_prob_t::width + id_prob_t::width + srrtot_t::width + meanz_t::width + hoe_t::width;
+                                shower_shape_t::width + rel_iso_t::width + id_prob_t::width + id_prob_t::width +
+                                srrtot_t::width + meanz_t::width + hoe_t::width;
 
     inline ap_uint<BITWIDTH> pack() const {
       ap_uint<BITWIDTH> ret;
@@ -299,6 +311,8 @@ namespace l1ct {
       pack_into_bits(ret, start, hwPhi);
       pack_into_bits(ret, start, hwPtErr);
       pack_into_bits(ret, start, hwEmID);
+      pack_into_bits(ret, start, hwShowerShape);
+      pack_into_bits(ret, start, hwRelIso);
       pack_into_bits(ret, start, hwPiProb);
       pack_into_bits(ret, start, hwEmProb);
       pack_into_bits(ret, start, hwSrrTot);
@@ -314,6 +328,8 @@ namespace l1ct {
       unpack_from_bits(src, start, ret.hwPhi);
       unpack_from_bits(src, start, ret.hwPtErr);
       unpack_from_bits(src, start, ret.hwEmID);
+      unpack_from_bits(src, start, ret.hwShowerShape);
+      unpack_from_bits(src, start, ret.hwRelIso);
       unpack_from_bits(src, start, ret.hwPiProb);
       unpack_from_bits(src, start, ret.hwEmProb);
       unpack_from_bits(src, start, ret.hwSrrTot);
