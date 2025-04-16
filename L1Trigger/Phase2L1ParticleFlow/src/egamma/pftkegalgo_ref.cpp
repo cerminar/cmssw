@@ -350,6 +350,11 @@ void PFTkEGAlgoEmulator::link_emCalo2tk_composite_eb_ee(const PFRegionEmu &r,
         sumTkPt += tk.floatPt();
         nTkMatch++;
       }
+      if (debug_ > 3)
+        dbgCout() << "[REF] tried to link calo " << ic << " (pt " << calo.floatPt() << ", eta " << calo.intEta()
+                  << ", phi " << calo.intPhi() << ") "
+                  << " to tk " << itk << " (pt " << tk.floatPt() << ", eta " << tk.intEta() << ", phi " << tk.intPhi()
+                  << ") keep: " << keep << std::endl;
     }
     // we use dpt as sort criteria
     std::sort(candidates.begin(),
@@ -509,6 +514,25 @@ id_score_t PFTkEGAlgoEmulator::compute_composite_score_eb_v1(CompositeCandidate 
                                              scaled_cltk_absDphi};
   auto *composite_bdt_eb_ = static_cast<conifer::BDT<bdt_eb_v1_feature_t, bdt_eb_v1_score_t, false> *>(model_);
   std::vector<bdt_eb_v1_score_t> bdt_score = composite_bdt_eb_->decision_function(inputs);
+  if (debug_ > 3) {
+    dbgCout() << "[REF] EM calo pt: " << calo.hwPt << " tk pt " << tk.hwPt << std::endl;
+    if (debug_ > 5) {
+      dbgCout() << " .  [0] cl_pt: " << cl_pt << std::endl;
+      dbgCout() << " .  [0] scaled cl_pt: " << scaled_cl_pt << std::endl;
+      dbgCout() << " .  [1] scaled cl_ss: " << scaled_cl_ss << std::endl;
+      dbgCout() << " .  [2] scaled cl_relIso: " << scaled_cl_relIso << std::endl;
+      dbgCout() << " .  [3] scaled cl_staWP: " << scaled_cl_staWP << std::endl;
+      dbgCout() << " .  [4] scaled cl_looseTkWP: " << scaled_cl_looseTkWP << std::endl;
+      dbgCout() << " .  [5] scaled tk_chi2RPhi: " << scaled_tk_chi2RPhi << std::endl;
+      dbgCout() << " .  [6] scaled tk_ptFrac: " << scaled_tk_ptFrac << std::endl;
+      dbgCout() << " .  [7] scaled cltk_ptRatio: " << scaled_cltk_ptRatio << std::endl;
+      dbgCout() << " .  [8] scaled cltk_nTkMatch: " << scaled_cltk_nTkMatch << std::endl;
+      dbgCout() << " .  [9] scaled cltk_absDeta: " << scaled_cltk_absDeta << std::endl;
+      dbgCout() << " .  [10] scaled cltk_absDphi: " << scaled_cltk_absDphi << std::endl;
+    }
+    dbgCout() << "  out BDT score: " << bdt_score[0] / 8 << std::endl;
+  }
+
   return bdt_score[0] / 8;  // normalize to [-1,1]
 }
 
