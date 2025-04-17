@@ -33,6 +33,7 @@ void EGInputSelectorEmulator::toFirmware(const std::vector<EmCaloObjEmu> &emcalo
 void EGInputSelectorEmulator::select_eginput(const l1ct::HadCaloObjEmu &in,
                                              l1ct::EmCaloObjEmu &out,
                                              bool &valid_out) const {
+  out.clear();
   out.src = in.src;
   out.hwPt = in.hwEmPt;
   out.hwEta = in.hwEta;
