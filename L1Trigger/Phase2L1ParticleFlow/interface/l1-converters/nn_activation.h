@@ -49,7 +49,6 @@ namespace nnet {
 
   template <class data_T, class res_T, typename CONFIG_T>
   void softmax_stable(data_T data[CONFIG_T::n_in], res_T res[CONFIG_T::n_in]) {
-#pragma HLS pipeline
     // Initialize the lookup tables
 #ifdef __HLS_SYN__
     bool initialized = false;
@@ -76,16 +75,13 @@ namespace nnet {
     // For the diffs, use the same type as the input but force rounding and saturation
     ap_fixed<data_T::width, data_T::iwidth, AP_RND, AP_SAT> d_xi_xmax[CONFIG_T::n_in];
     for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
-#pragma HLS unroll
       d_xi_xmax[i] = data[i] - x_max;
     }
 
     // Calculate all the e^x's
     typename CONFIG_T::exp_table_t exp_res[CONFIG_T::n_in];
-#pragma HLS array_partition variable = exp_res complete
     typename CONFIG_T::exp_table_t exp_sum(0);
     for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
-#pragma HLS unroll
       unsigned x = softmax_idx_from_real_val<data_T, CONFIG_T>(d_xi_xmax[i]);
       exp_res[i] = exp_table[x];
     }
@@ -99,7 +95,6 @@ namespace nnet {
     typename CONFIG_T::inv_table_t inv_exp_sum =
         invert_table[softmax_idx_from_real_val<typename CONFIG_T::exp_table_t, CONFIG_T>(exp_sum)];
     for (unsigned i = 0; i < CONFIG_T::n_in; i++) {
-#pragma HLS unroll
       res[i] = exp_res[i] * inv_exp_sum;
     }
   }
