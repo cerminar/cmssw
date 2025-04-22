@@ -1017,9 +1017,9 @@ void L1TCorrelatorLayer1Producer::getDecodedGctEmCluster(l1ct::EmCaloObjEmu &cal
   calo.clear();
   calo.hwPt = l1ct::Scales::makePtFromFloat(digi.pt() * digi.ptLSB());
   calo.hwEta = l1ct::Scales::makeGlbEta(digi.realEta() + ETA_LSB / 2.) -
-               sec.region.hwEtaCenter;  // FIXME: correct here a 1/2 a crystal bias
-  calo.hwPhi = l1ct::Scales::makePhi(
-      sec.region.localPhi(digi.realPhi() + PHI_LSB / 2.));  // FIXME: correct here a 1/2 a crystal bias
+               sec.region.hwEtaCenter;  // FIXME: correct here a 1/2 a crystal bias: should remove if fixed upstream
+  calo.hwPhi = l1ct::Scales::makePhi(sec.region.localPhi(
+      digi.realPhi() + PHI_LSB / 2.));  // FIXME: correct here a 1/2 a crystal bias: should remove if fixed upstream
   if (corrector_.valid()) {
     float newpt = corrector_.correctedPt(calo.floatPt(), calo.floatPt(), sec.region.floatGlbEta(calo.hwEta));
     calo.hwPt = l1ct::Scales::makePtFromFloat(newpt);
