@@ -100,6 +100,7 @@ namespace l1ct {
 
     inline static HadCaloObj unpack_barrel(const ap_uint<BITWIDTH_BARREL> &src) {
       HadCaloObj ret;
+      ret.clear();
       unsigned int start = 0;
       unpack_from_bits(src, start, ret.hwPt);
       unpack_from_bits(src, start, ret.hwEta);
@@ -111,6 +112,7 @@ namespace l1ct {
 
     inline static HadCaloObj unpack_endcap(const ap_uint<BITWIDTH_ENDCAP> &src) {
       HadCaloObj ret;
+      ret.clear();
       unsigned int start = 0;
       unpack_from_bits(src, start, ret.hwPt);
       unpack_from_bits(src, start, ret.hwEta);
@@ -267,6 +269,7 @@ namespace l1ct {
 
     inline static EmCaloObj unpack_barrel(const ap_uint<BITWIDTH_BARREL> &src) {
       EmCaloObj ret;
+      ret.clear();
       unsigned int start = 0;
       unpack_from_bits(src, start, ret.hwPt);
       unpack_from_bits(src, start, ret.hwEta);
@@ -280,6 +283,7 @@ namespace l1ct {
 
     inline static EmCaloObj unpack_endcap(const ap_uint<BITWIDTH_ENDCAP> &src) {
       EmCaloObj ret;
+      ret.clear();
       unsigned int start = 0;
       unpack_from_bits(src, start, ret.hwPt);
       unpack_from_bits(src, start, ret.hwEta);
@@ -496,6 +500,7 @@ namespace l1ct {
 
     inline static TkObj unpack_barrel(const ap_uint<BITWIDTH_BARREL> &src) {
       TkObj ret;
+      ret.clear();
       unsigned int start = 0;
       unpack_from_bits(src, start, ret.hwPt);
       unpack_from_bits(src, start, ret.hwEta);
@@ -512,6 +517,7 @@ namespace l1ct {
 
     inline static TkObj unpack_endcap(const ap_uint<BITWIDTH_ENDCAP> &src) {
       TkObj ret;
+      ret.clear();
       unsigned int start = 0;
       unpack_from_bits(src, start, ret.hwPt);
       unpack_from_bits(src, start, ret.hwEta);
