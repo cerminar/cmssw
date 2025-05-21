@@ -28,8 +28,12 @@
 using namespace l1t;
 
 class L1JUMPProducer : public edm::global::EDProducer<> {
-  // JUMP Producer
-  // JUMP: Jet Uncertainty-aware MET Prediction
+    /*
+    Producer for the JUMP Algorithm
+    JUMP: Jet Uncertainty-aware MET Prediction
+    - Approximate L1 Jet energy resolution by pT, eta value
+    - Apply the estimated resolution to MET
+  */
 public:
   explicit L1JUMPProducer(const edm::ParameterSet&);
   ~L1JUMPProducer() override;
@@ -39,18 +43,7 @@ private:
   edm::EDGetTokenT<std::vector<l1t::EtSum>> metToken;
   edm::EDGetTokenT<std::vector<l1t::PFJet>> jetsToken;
 
-  typedef ap_ufixed<14, 12, AP_TRN, AP_SAT> pt_t;  // LSB = 0.25 GeV
-  typedef ap_ufixed<28, 24, AP_TRN, AP_SAT> pt2_t;
-  typedef ap_fixed<16, 14, AP_TRN, AP_SAT> pxy_t;
-  typedef ap_int<12> eta_t;  // glbeta_t(12)
-  typedef ap_int<11> phi_t;  // glbphi_t(11)
-
-  typedef ap_fixed<22, 12> proj_t;  // for x,y projections
-  typedef ap_fixed<32, 22> proj2_t;
-  typedef ap_fixed<32, 2> poly_t;
-  typedef ap_fixed<32, 2> poly2_t;
-
-  typedef l1ct::Sum Met;
+  typedef l1ct::pt_t pt_t;
   typedef l1ct::Jet Jet;
 
   static constexpr float ptLSB_ = 0.25;
@@ -62,7 +55,6 @@ private:
                     reco::Candidate::PolarLorentzVector& JUMPVector) const;
 
   std::vector<l1ct::Jet> convertEDMToHW(std::vector<l1t::PFJet> edmJets) const;
-  std::vector<l1t::EtSum> convertHWToEDM(l1ct::Sum hwSums) const;
 
   float minJetPt = 30;
   float maxJetEta = 3.0;
@@ -91,9 +83,8 @@ void L1JUMPProducer::produce(edm::StreamID, edm::Event& iEvent, const edm::Event
   // JUMP Algorithm
   reco::Candidate::PolarLorentzVector JUMPVector;
   CalcJUMP_HLS(rawMET, hwJetsFiltered, JUMPVector);
-  // CalcJUMP_HLS(rawMET, hwJets, JUMPVector);
 
-  l1t::EtSum theJUMP(JUMPVector, l1t::EtSum::EtSumType::kTotalHt, 0, 0, 0, 0);
+  l1t::EtSum theJUMP(JUMPVector, l1t::EtSum::EtSumType::kMissingEt, 0, 0, 0, 0);
   auto JUMPCollection = std::make_unique<std::vector<l1t::EtSum>>(0);
   JUMPCollection->push_back(theJUMP);
   iEvent.put(std::move(JUMPCollection));
@@ -123,28 +114,6 @@ std::vector<l1ct::Jet> L1JUMPProducer::convertEDMToHW(std::vector<l1t::PFJet> ed
     hwJets.push_back(hwJet);
   });
   return hwJets;
-}
-
-std::vector<l1t::EtSum> L1JUMPProducer::convertHWToEDM(l1ct::Sum hwSums) const {
-  std::vector<l1t::EtSum> edmSums;
-
-  reco::Candidate::PolarLorentzVector htVector;
-  l1gt::Sum gtSum = hwSums.toGT();
-  htVector.SetPt(l1gt::Scales::floatPt(gtSum.scalar_pt));
-  htVector.SetPhi(0);
-  htVector.SetEta(0);
-
-  reco::Candidate::PolarLorentzVector mhtVector;
-  mhtVector.SetPt(l1gt::Scales::floatPt(gtSum.vector_pt));
-  mhtVector.SetPhi(l1gt::Scales::floatPhi(gtSum.vector_phi));
-  mhtVector.SetEta(0);
-
-  l1t::EtSum ht(htVector, l1t::EtSum::EtSumType::kTotalHt, gtSum.scalar_pt.bits_to_uint64());
-  l1t::EtSum mht(mhtVector, l1t::EtSum::EtSumType::kMissingHt, gtSum.vector_pt.bits_to_uint64(), 0, gtSum.vector_phi);
-
-  edmSums.push_back(ht);
-  edmSums.push_back(mht);
-  return edmSums;
 }
 
 L1JUMPProducer::~L1JUMPProducer() {}
