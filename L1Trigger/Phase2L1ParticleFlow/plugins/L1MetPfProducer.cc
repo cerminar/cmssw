@@ -110,8 +110,7 @@ void L1MetPfProducer::produce(edm::StreamID, edm::Event& iEvent, const edm::Even
   for (int i=0; i < int(pfcands.size()) && (i < maxCands_ || maxCands_ < 0); i++){
     const auto& cand = pfcands[i];
     l1ct::PuppiObjEmu each_particle;
-    each_particle.hwPt = pt_t(cand.pt());
-    each_particle.hwPhi = phi_t(float(TVector2::Phi_mpi_pi(cand.phi()) / phiLSB_));
+    each_particle.initFromBits(cand.encodedPuppi64());
     particles.push_back(each_particle);
   }
 

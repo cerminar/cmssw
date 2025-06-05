@@ -19,7 +19,6 @@
 
 namespace L1METEmu {
   // Define Data types for P2 L1 MET Emulator
-
   typedef l1ct::pt_t pt_t;
   typedef l1ct::glbphi_t phi_t;
   typedef l1ct::glbeta_t eta_t;
@@ -142,11 +141,13 @@ namespace L1METEmu {
                              -5.262894200243701e-06,
                              -1.835864457852788e-06};
 
-    phi_t phi2_edges[17] = {-720, -630, -540, -450, -360, -270, -180, -90, 0, 90, 180, 270, 360, 450, 540, 630, 720};
-
+    phi_t phi2_edges[17];
+    float phi2_points[17] = {-1.0*M_PI, -0.875*M_PI, -0.75*M_PI, -0.625*M_PI, -0.5*M_PI, -0.375*M_PI, -0.25*M_PI, -0.125*M_PI, 0.0, 0.125*M_PI, 0.25*M_PI, 0.375*M_PI, 0.5*M_PI, 0.625*M_PI, 0.75*M_PI, 0.875*M_PI, 1.0*M_PI};
+    for (uint i=0; i < 17; i++){
+      phi2_edges[i] = l1ct::Scales::makeGlbPhi(phi2_points[i]);
+    }
 
     int phibin = 0;
-
     for (uint i = 0; i < 16; i++){
       if (hwPhi >= phi2_edges[i] && hwPhi < phi2_edges[i + 1]) {
         phibin = i;
@@ -186,11 +187,10 @@ namespace L1METEmu {
     
     #ifdef CMSSW_GIT_HASH
     hls_met.hwPt = hypot(met_xy.hwPx.to_float(), met_xy.hwPy.to_float());
-    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(atan2(met_xy.hwPy.to_float(), met_xy.hwPx.to_float())) *
-                          ap_fixed<26, 11>(229.29936));  // 720/pi
+    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(l1ct::Scales::makeGlbPhi(atan2(met_xy.hwPy.to_float(), met_xy.hwPx.to_float()))));  // 720/pi
     #else
     hls_met.hwPt = hls::hypot(met_xy.hwPx, met_xy.hwPy);
-    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(hls::atan2(met_xy.hwPy, met_xy.hwPx)) * ap_fixed<26, 11>(229.29936));
+    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(l1ct::Scales::makeGlbPhi(hls::atan2(met_xy.hwPy, met_xy.hwPx))));
     #endif
   
     return;

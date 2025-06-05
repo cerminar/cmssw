@@ -56,13 +56,15 @@ private:
 
   std::vector<l1ct::Jet> convertEDMToHW(std::vector<l1t::PFJet> edmJets) const;
 
-  float minJetPt = 30;
-  float maxJetEta = 3.0;
+  double minJetPt;
+  double maxJetEta;
 };
 
 L1JUMPProducer::L1JUMPProducer(const edm::ParameterSet& cfg)
     : metToken(consumes<std::vector<l1t::EtSum>>(cfg.getParameter<edm::InputTag>("RawMET"))),
-      jetsToken(consumes<std::vector<l1t::PFJet>>(cfg.getParameter<edm::InputTag>("L1PFJets"))) {
+      jetsToken(consumes<std::vector<l1t::PFJet>>(cfg.getParameter<edm::InputTag>("L1PFJets"))),
+      minJetPt(cfg.getParameter<double>("MinJetpT")),
+      maxJetEta(cfg.getParameter<double>("MaxJetEta")) {
   produces<std::vector<l1t::EtSum>>();
 }
 
@@ -76,7 +78,7 @@ void L1JUMPProducer::produce(edm::StreamID, edm::Event& iEvent, const edm::Event
   // Apply pT and eta selections
   std::vector<l1ct::Jet> hwJetsFiltered;
   std::copy_if(hwJets.begin(), hwJets.end(), std::back_inserter(hwJetsFiltered), [&](auto jet) {
-    return jet.hwPt > l1ct::Scales::makePtFromFloat(minJetPt) &&
+    return jet.hwPt > l1ct::Scales::makePtFromFloat(float(minJetPt)) &&
            std::abs(jet.hwEta) < l1ct::Scales::makeGlbEta(maxJetEta);
   });
 

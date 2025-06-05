@@ -17,18 +17,28 @@
 namespace L1JUMPEmu {
   /*
     Emulator for the JUMP Algorithm
+    DPS Note publicly available on CDS: CMS DP-2025/023
     JUMP: Jet Uncertainty-aware MET Prediction
     - Approximate L1 Jet energy resolution by pT, eta value
     - Apply the estimated resolution to MET
   */
 
   inline void Get_dPt(l1ct::Jet jet, L1METEmu::proj2_t& dPx_2, L1METEmu::proj2_t& dPy_2) {
+    /*
+      L1 Jet Energy Resolution parameterization
+      - Fitted σ(pT)/pT as a function of jet pT in each η region (detector boundary at η≈1.3, 1.7, 2.5, 3.0)
+      - Derived from simulated QCD multijet samples to calculate detector‐dependent resolution
+      - σ(pT) ≈ eta_par1[i] * pT + eta_par2[i]
+    */
 
-    // Fitted with QCD samples
     ap_fixed<11, 1> eta_par1[5] = {0, 0.073, 0.247, 0.128, 0.091};
     ap_fixed<8, 5> eta_par2[5] = {0, 12.322, 6.061, 10.944, 12.660};
 
-    L1METEmu::eta_t eta_edges[4] = {298, 390, 573, 688};
+    L1METEmu::eta_t eta_edges[4];
+    float eta_boundaries[4] = {1.3, 1.7, 2.5, 3.0};
+    for (uint i=0; i < 4; i++){
+      eta_edges[i] = l1ct::Scales::makeGlbEta(eta_boundaries[i]);
+    }
 
     L1METEmu::eta_t abseta = abs(jet.hwEta.to_float());
     int etabin = 0;
