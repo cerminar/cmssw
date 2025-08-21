@@ -187,6 +187,9 @@ if not args.patternFilesOFF:
     process.l1tLayer1HGCalNoTK.patternWriters = cms.untracked.VPSet(*hgcalNoTKWriterConfigs)
     process.l1tLayer1HF.patternWriters = cms.untracked.VPSet(*hfWriterConfigs)
 
+process.l1tLayer1HGCal.hgcalInputConversionParameters.emulateCorrections = True
+process.l1tLayer1HGCalNoTK.hgcalInputConversionParameters.emulateCorrections = True
+
 process.runPF = cms.Path(
         process.l1tGTTInputProducer +
         process.l1tTrackSelectionProducer +
