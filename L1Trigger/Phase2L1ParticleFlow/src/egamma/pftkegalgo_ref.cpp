@@ -434,10 +434,12 @@ id_score_t l1ct::TkEgCID_EB_v1::compute_score(const CompositeCandidate &cand,
       dbgCout() << " .  [9] scaled cltk_absDeta: " << scaled_cltk_absDeta << std::endl;
       dbgCout() << " .  [10] scaled cltk_absDphi: " << scaled_cltk_absDphi << std::endl;
     }
-    dbgCout() << "  out BDT score: " << bdt_score[0] / 8 << std::endl;
+    dbgCout() << "  out BDT score: " << (bdt_score[0] >> (bdt_score_t::iwidth - 1)) << std::endl;
   }
 
-  return bdt_score[0] / 8;  // normalize to [-1,1]
+  // We normalize to -1 and 1 with MAX_SCORE = (1 << (bdt_score_t::iwidth - 1));
+  // use bitshift to get truncation as in FW
+  return (bdt_score[0] >> (bdt_score_t::iwidth - 1));  // normalize to [-1,1]
 }
 
 PFTkEGAlgoEmulator::PFTkEGAlgoEmulator(const PFTkEGAlgoEmuConfig &config)
