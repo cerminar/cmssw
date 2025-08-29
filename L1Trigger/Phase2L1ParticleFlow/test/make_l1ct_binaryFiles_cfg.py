@@ -188,6 +188,7 @@ if not args.patternFilesOFF:
     process.l1tLayer1HF.patternWriters = cms.untracked.VPSet(*hfWriterConfigs)
 
 process.l1tLayer1HGCal.hgcalInputConversionParameters.emulateCorrections = True
+process.l1tLayer1HGCalElliptic.hgcalInputConversionParameters.emulateCorrections = True
 process.l1tLayer1HGCalNoTK.hgcalInputConversionParameters.emulateCorrections = True
 
 process.runPF = cms.Path(
