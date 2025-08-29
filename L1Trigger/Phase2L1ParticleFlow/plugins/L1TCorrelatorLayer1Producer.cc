@@ -89,8 +89,6 @@ private:
   edm::EDGetTokenT<l1tp2::GCTEmDigiClusterCollection> emGCTRawCands_;
   edm::EDGetTokenT<l1tp2::GCTHadDigiClusterCollection> hadGCTRawCands_;
 
-  float emPtCut_, hadPtCut_;
-
   l1ct::Event event_;
   std::unique_ptr<l1ct::TrackInputEmulator> trackInput_;
   std::unique_ptr<l1ct::GMTMuonDecoderEmulator> muonInput_;
@@ -226,8 +224,6 @@ L1TCorrelatorLayer1Producer::L1TCorrelatorLayer1Producer(const edm::ParameterSet
                           : edm::EDGetTokenT<l1t::PFTrackCollection>()),
       trkPt_(iConfig.getParameter<double>("trkPtCut")),
       muCands_(consumes<l1t::SAMuonCollection>(iConfig.getParameter<edm::InputTag>("muons"))),
-      emPtCut_(iConfig.getParameter<double>("emPtCut")),
-      hadPtCut_(iConfig.getParameter<double>("hadPtCut")),
       regionizer_(nullptr),
       l1pfalgo_(nullptr),
       l1pualgo_(nullptr),
@@ -402,8 +398,6 @@ void L1TCorrelatorLayer1Producer::fillDescriptions(edm::ConfigurationDescription
   desc.add<edm::InputTag>("hadClusters", edm::InputTag(""));
   desc.add<edm::InputTag>("vtxCollection", edm::InputTag("l1tVertexFinderEmulator", "L1VerticesEmulation"));
   desc.add<bool>("vtxCollectionEmulation", true);
-  desc.add<double>("emPtCut", 0.0);
-  desc.add<double>("hadPtCut", 0.0);
   desc.add<double>("trkPtCut", 0.0);
   desc.add<int32_t>("nVtx");
   // Input conversion
@@ -964,8 +958,7 @@ void L1TCorrelatorLayer1Producer::addGCTHadCalo(const l1t::PFCluster &calo, cons
     if (sec.region.contains(calo.eta(), calo.phi())) {
       l1ct::HadCaloObjEmu decCalo;
       getDecodedGCTPFCluster(decCalo, sec, calo);
-      if (decCalo.floatPt() > hadPtCut_)
-        addDecodedHadCalo(decCalo, caloPtr, sec);
+      addDecodedHadCalo(decCalo, caloPtr, sec);
     }
   }
 }
@@ -997,8 +990,7 @@ void L1TCorrelatorLayer1Producer::addHGCalHadCalo(const l1t::HGCalMulticluster &
       // Use the valid flag to reject PU clusters when creating the decoded object
       bool valid = true;
       l1ct::HadCaloObjEmu decCalo = hgcalInput_->decode(sec_raw.region, cwrd, valid);
-      if (decCalo.floatPt() > hadPtCut_ && valid)
-        addDecodedHadCalo(decCalo, caloPtr, sec);
+      addDecodedHadCalo(decCalo, caloPtr, sec);
     }
   }
 }
