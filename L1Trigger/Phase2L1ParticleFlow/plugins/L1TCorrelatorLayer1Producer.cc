@@ -787,7 +787,7 @@ void L1TCorrelatorLayer1Producer::addEmPFCluster(const l1ct::EmCaloObjEmu &decCa
   pfClusters->emplace_back(decCalo.floatPt(),
                            region.floatGlbEta(decCalo.hwEta),
                            region.floatGlbPhi(decCalo.hwPhi),
-                           decCalo.floatHoe(),
+                           decCalo.floatHoe(),  //FIXME: should be taken from src
                            true,
                            decCalo.floatPtErr(),
                            decCalo.intPt(),
@@ -821,7 +821,7 @@ void L1TCorrelatorLayer1Producer::addHadPFCluster(const l1ct::HadCaloObjEmu &dec
   pfClusters->emplace_back(decCalo.floatPt(),
                            region.floatGlbEta(decCalo.hwEta),
                            region.floatGlbPhi(decCalo.hwPhi),
-                           decCalo.floatHoe(),
+                           decCalo.floatHoe(),  //FIXME: should be taken from src
                            decCalo.hwIsEM(),
                            0.,  // ptError
                            decCalo.intPt(),
@@ -973,7 +973,7 @@ void L1TCorrelatorLayer1Producer::getDecodedGCTPFCluster(l1ct::HadCaloObjEmu &ca
   calo.hwPhi = l1ct::Scales::makePhi(sec.region.localPhi(cluster.phi()));
   calo.hwEmPt = l1ct::Scales::makePtFromFloat(cluster.emEt());
   calo.hwEmID = cluster.hwEmID();
-  calo.hwHoe = l1ct::Scales::makeHoe(cluster.hOverE());
+  // calo.hwHoe = l1ct::Scales::makeHoe(cluster.hOverE());
 }
 
 void L1TCorrelatorLayer1Producer::addHGCalHadCalo(const l1t::HGCalMulticluster &calo,
