@@ -7,7 +7,7 @@
 
 #include "L1Trigger/Phase2L1ParticleFlow/interface/dbgPrintf.h"
 
-#include "nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 
 #ifdef CMSSW_GIT_HASH
 #include "FWCore/Utilities/interface/FileInPath.h"
@@ -159,14 +159,17 @@ namespace L1METEmu {
     // convert x, y coordinate to pt, phi coordinate using math library
     hls_met.clear();
 
-#ifdef CMSSW_GIT_HASH
-    hls_met.hwPt = hypot(met_xy.hwPx.to_float(), met_xy.hwPy.to_float());
-    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(atan2(met_xy.hwPy.to_float(), met_xy.hwPx.to_float())) *
-                          ap_fixed<26, 11>(229.29936));  // Scale for L1 phi value (720 / M_PI)
-#else
-    hls_met.hwPt = hls::hypot(met_xy.hwPx, met_xy.hwPy);
-    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(hls::atan2(met_xy.hwPy, met_xy.hwPx)) * ap_fixed<26, 11>(229.29936));
-#endif
+    // Convert (px,py) -> (pt,phi)
+    // phi_L1 = phi_rad * (720 / pi), so that phi in [-pi, pi) maps to approximately [-720, 720).
+    // 229.29936 is the numerical value of (720 / M_PI).
+    #ifdef CMSSW_GIT_HASH
+        hls_met.hwPt = hypot(met_xy.hwPx.to_float(), met_xy.hwPy.to_float());
+        hls_met.hwPhi = phi_t(ap_fixed<26, 11>(atan2(met_xy.hwPy.to_float(), met_xy.hwPx.to_float())) *
+                              ap_fixed<26, 11>(229.29936));
+    #else
+        hls_met.hwPt = hls::hypot(met_xy.hwPx, met_xy.hwPy);
+        hls_met.hwPhi = phi_t(ap_fixed<26, 11>(hls::atan2(met_xy.hwPy, met_xy.hwPx)) * ap_fixed<26, 11>(229.29936));
+    #endif
   }
 
   inline void met_format(const l1ct::Sum d, ap_uint<l1gt::Sum::BITWIDTH>& q) {
