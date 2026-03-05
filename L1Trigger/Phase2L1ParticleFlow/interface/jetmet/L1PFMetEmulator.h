@@ -159,16 +159,16 @@ namespace L1METEmu {
     // convert x, y coordinate to pt, phi coordinate using math library
     hls_met.clear();
 
-    // Convert (px,py) -> (pt,phi)
-    // phi_L1 = phi_rad * (720 / pi), so that phi in [-pi, pi) maps to approximately [-720, 720).
-    // 229.183118 is the numerical value of (720 / M_PI).
+    // Convert (px, py) -> (pt, phi)
+    // INTPHI_PI = 720, so phi_L1 = phi_rad * (INTPHI_PI / M_PI). This maps phi in [-pi, pi] to [-720, 720].
+    static const float phi_scale = l1ct::Scales::INTPHI_PI / M_PI;
 #ifdef CMSSW_GIT_HASH
     hls_met.hwPt = hypot(met_xy.hwPx.to_float(), met_xy.hwPy.to_float());
     hls_met.hwPhi = phi_t(ap_fixed<26, 11>(atan2(met_xy.hwPy.to_float(), met_xy.hwPx.to_float())) *
-                          ap_fixed<26, 11>(229.183118));
+                          ap_fixed<26, 11>(phi_scale));
 #else
     hls_met.hwPt = hls::hypot(met_xy.hwPx, met_xy.hwPy);
-    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(hls::atan2(met_xy.hwPy, met_xy.hwPx)) * ap_fixed<26, 11>(229.183118));
+    hls_met.hwPhi = phi_t(ap_fixed<26, 11>(hls::atan2(met_xy.hwPy, met_xy.hwPx)) * ap_fixed<26, 11>(phi_scale));
 #endif
   }
 
