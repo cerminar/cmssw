@@ -172,7 +172,7 @@ namespace l1ct {
     const std::vector<int> &dPhiHGCalTanlLUT() const { return dPhiHGCalTanlLUT_; }
     const std::vector<int> &tanlLUT() const { return tanlLUT_; }
     const std::vector<l1ct::pt_t> &ptLUT() const { return ptLUT_; }
-    const std::vector<int> &dxyLUT() const { return dxyLUT_; }
+    const std::vector<l1ct::dxy_t> &dxyLUT() const { return dxyLUT_; }
 
     unsigned int countSetBits(unsigned int n) const {
       unsigned int count = 0;
@@ -257,7 +257,7 @@ namespace l1ct {
 
     // dxy to sqrt(dxy) LUT parameters
     int dxyLUTShift_;
-    std::vector<int> dxyLUT_;
+    std::vector<l1ct::dxy_t> dxyLUT_;
 
     /// enable debug printout in some metods
     bool debug_;
