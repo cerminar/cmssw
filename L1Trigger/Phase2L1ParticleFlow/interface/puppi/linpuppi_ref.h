@@ -14,12 +14,6 @@ namespace edm {
 }  // namespace edm
 
 namespace l1ct {
-#ifdef CMSSW_GIT_HASH
-  const bool withinCMSSW_ = true;
-#else
-  const bool withinCMSSW_ = false;
-#endif
-
   class LinPuppiEmulator {
   public:
     enum class SortAlgo { Insertion, BitonicRUFL, BitonicHLS, Hybrid, FoldedHybrid, BitonicVHDL };
@@ -74,13 +68,15 @@ namespace l1ct {
           finalSortAlgo_(finalSortAlgo),
           debug_(false),
           fakePuppi_(false) {
-      if (useMLAssociation_ and withinCMSSW_) {
+#ifdef CMSSW_GIT_HASH
+      if (useMLAssociation_) {
         nnVtxAssoc_ = std::make_unique<NNVtxAssoc>(NNVtxAssoc(associationGraphPath,
                                                               associationThreshold,
                                                               associationNetworkZ0binning,
                                                               associationNetworkEtaBounds,
                                                               associationNetworkZ0ResBins));
       }
+#endif
     }
 
     LinPuppiEmulator(unsigned int nTrack,
