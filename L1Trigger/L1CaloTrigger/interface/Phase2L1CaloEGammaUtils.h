@@ -1319,6 +1319,46 @@ namespace p2eg {
       if (reliso_f < 0.0f) reliso_f = 0.0f;
       if (reliso_f > 63.0f) reliso_f = 63.0f;
 
+      std::cout << "[GCT] is_iso: " << is_iso 
+                << " is_ss: " << is_ss 
+                << " standaloneWP: " << standaloneWP() 
+                << " is_looseTkiso: " << is_looseTkiso
+                << " is_looseTkss: " << is_looseTkss
+                << " looseL1TkMatchWP: " << looseL1TkMatchWP() 
+                << " quality: " << quality << std::endl;
+      
+      ap_uint<2> isoFlag = (is_iso) | (is_looseTkiso << 1);
+      ap_uint<2> ssFlag = (is_ss) | (is_looseTkss << 1);
+      bool passes_iso = isoFlag & 0x1;
+      bool passes_looseTkiso = isoFlag & 0x2;
+      bool passes_ss = ssFlag & 0x1;
+      bool passes_looseTkss = ssFlag & 0x2;
+      unsigned int old_qual = (passes_iso && passes_ss) |
+                        ((passes_looseTkiso && passes_looseTkss) << 1) | (true << 2);
+      std::cout <<  " isoFlag: " << isoFlag 
+                << " ssFlag: " << ssFlag 
+                << " passes_iso: " << passes_iso
+                << " passes_ss: " << passes_ss
+                << " passes_looseTkiso: " << passes_looseTkiso
+                << " passes_looseTkss: " << passes_looseTkss
+                << " WP: " << old_qual << std::endl;
+      // if (et > iso && et > 0) {
+      //   relIso_int = (int)(isoFloat() * 63 / etFloat());
+      // } else {
+      //   relIso_int = 63;
+      // }
+      // std::cout << "[GCT] pt: " << etFloat() << " eta: " << realEta() << " phi: " << realPhi() << ", iso: " << isoFloat() 
+      //           << ", et: " << etFloat() 
+      //           << " reliso: " << isoFloat()/etFloat() 
+      //           << ", reliso_f: " << reliso_f 
+      //           << " val: " << ap_uint<6>(reliso_f + 0.5f).to_int() << std::endl;
+
+      // std::cout << "[GCT] et2x5: " << et2x5Float() 
+      //           << " et5x5: " << et5x5Float() 
+      //           << " shape float: " << et2x5Float()/et5x5Float() 
+      //           << ", shape: " << shape <<  std::endl;
+
+
       // normalize hoe to 0x3F
       int hoe_int = (int)(hoe * 63 / 15);
 

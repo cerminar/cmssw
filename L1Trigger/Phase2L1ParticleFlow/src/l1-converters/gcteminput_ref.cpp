@@ -44,6 +44,7 @@ l1ct::EmCaloObjEmu l1ct::GctEmClusterDecoderEmulator::decode(const l1ct::PFRegio
   if (corrector_.valid()) {
     float newpt =
         corrector_.correctedPt(calo.floatPt(), calo.floatPt(), calo.floatEta());  // NOTE: this is still abs(globalEta)
+    std::cout << "Original pt: " << calo.floatPt() << ", corrected pt: " << newpt << std::endl;
     calo.hwPt = l1ct::Scales::makePtFromFloat(newpt);
   }
 

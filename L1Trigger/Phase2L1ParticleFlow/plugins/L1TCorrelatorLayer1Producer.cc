@@ -1120,6 +1120,22 @@ void L1TCorrelatorLayer1Producer::addDecodedGCTEmCalo(l1ct::DetectorSector<l1ct:
   l1ct::EmCaloObjEmu calo = gctEmInput_->decode(sec.region, digi.data());
 
   auto caloPtr = edm::refToPtr(digi.clusterRef());
+  l1ct::rel_iso_t hwreliso = l1ct::Scales::makeRelIso(caloPtr ->isolation() / calo.hwPt.to_float());
+  std::cout << "Decoded pt: " << calo.floatPt() 
+            << " eta: " << sec.region.floatGlbEtaOf(calo) 
+            << " phi: " << sec.region.floatGlbPhiOf(calo) 
+            << " relIso (f): " << calo.floatRelIso() 
+            << " relIso (hw): " << calo.hwRelIso 
+            << " src iso (f): " << caloPtr ->isolation()
+            << " src relIso (f):  " << l1ct::Scales::floatRelIso(hwreliso) 
+            << " src relIso (hw): " << hwreliso 
+            << " showershape: " << calo.hwShowerShape
+            << " qual: " << calo.hwEmID << std::endl;
+  std::cout << "   scr pt " << caloPtr ->pt() << " eta: " << caloPtr ->eta() << " phi: " << caloPtr ->phi() 
+            << " iso: " << caloPtr ->isolation() << " relIso: " << caloPtr ->isolation() / caloPtr ->pt()  
+            << " showershape: " << caloPtr ->e2x5() / caloPtr ->e5x5() 
+            << " hw: " << l1ct::shower_shape_t(caloPtr ->e2x5() / caloPtr ->e5x5()) << std::endl;
+  
   addDecodedEmCalo(calo, caloPtr, sec);
 }
 
