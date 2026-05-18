@@ -24,7 +24,7 @@ namespace P2L1HTMHTEmu {
   typedef ap_fixed<9, 2> cossin_t;
   typedef ap_fixed<16, 13> pxy_t;
   static constexpr int Fin = 6;  // Number of decimal bits/precision of met squared i.e. 2*16 - 2*13
-  static constexpr int Fout = pt_t::width - pt_t::iwidth; // Number of decimal bits/precision of output met
+  static constexpr int Fout = pt_t::width - pt_t::iwidth;  // Number of decimal bits/precision of output met
 
   static constexpr int N_TABLE = 2048;
 
