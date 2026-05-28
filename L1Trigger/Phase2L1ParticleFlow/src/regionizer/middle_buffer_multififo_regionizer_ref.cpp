@@ -120,14 +120,16 @@ l1ct::MiddleBufferMultififoRegionizerEmulator::MiddleBufferMultififoRegionizerEm
       for (unsigned int j = 0; j < 3; ++j) {               // 3 regions x sector
         for (unsigned int il = 0; il < HCAL_LINKS; ++il) {
           caloRoutes_.emplace_back(is, il, 3 * is + j + phisectors * ie, il);
-          if (j != 2) {
-            caloRoutes_.emplace_back((is + 2) % 3, il, 3 * is + j + phisectors * ie, il + HCAL_LINKS);
+          if (j != 1) {
+            const unsigned int from_sector = (is + (j == 2 ? 1 : 2)) % NCALO_SECTORS;
+            caloRoutes_.emplace_back(from_sector, il, 3 * is + j + phisectors * ie, il + HCAL_LINKS);
           }
         }
         for (unsigned int il = 0; il < ECAL_LINKS; ++il) {
           emCaloRoutes_.emplace_back(is, il, 3 * is + j + phisectors * ie, il);
-          if (j != 2) {
-            emCaloRoutes_.emplace_back((is + 2) % 3, il, 3 * is + j + phisectors * ie, il + ECAL_LINKS);
+          if (j != 1) {
+            const unsigned int from_sector = (is + (j == 2 ? 1 : 2)) % NCALO_SECTORS;
+            emCaloRoutes_.emplace_back(from_sector, il, 3 * is + j + phisectors * ie, il + ECAL_LINKS);
           }
         }
       }
