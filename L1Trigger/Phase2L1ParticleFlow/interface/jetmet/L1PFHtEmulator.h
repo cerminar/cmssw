@@ -120,7 +120,9 @@ inline l1ct::Sum htmht(std::vector<l1ct::Jet> jets) {
   // Compute the MHT magnitude and direction
   l1ct::Sum ht;
   ht.hwSumPt = hthxhy.pt;
-#ifdef CMSSW_GIT_HASH
+
+  // this emulates the following firmware function, since hls_math.h is not available in CMSSW
+  // ht.hwPt = hls::sqrt(((hthxhy.px * hthxhy.px) + (hthxhy.py * hthxhy.py)));
   double d = std::sqrt(((hthxhy.px * hthxhy.px) + (hthxhy.py * hthxhy.py)).to_double());
   // emulate hls::sqrt internal rounding
   double rounded = std::round(d * (1 << P2L1HTMHTEmu::Fin)) / (1 << P2L1HTMHTEmu::Fin);
@@ -128,9 +130,7 @@ inline l1ct::Sum htmht(std::vector<l1ct::Jet> jets) {
   double truncated = std::floor(rounded * (1 << P2L1HTMHTEmu::Fout)) / (1 << P2L1HTMHTEmu::Fout);
   P2L1HTMHTEmu::pt_t hwPt_hls = truncated;
   ht.hwPt = hwPt_hls;
-#else
-  ht.hwPt = hls::sqrt(((hthxhy.px * hthxhy.px) + (hthxhy.py * hthxhy.py)));
-#endif
+
   ht.hwPhi = P2L1HTMHTEmu::phi_cordic(hthxhy.py, hthxhy.px);
   return ht;
 }
