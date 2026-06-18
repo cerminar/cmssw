@@ -283,7 +283,7 @@ void Phase2GCTBarrelToCorrelatorLayer1::produce(edm::Event& iEvent, const edm::E
         ap_int<7> pf_phi = 0x7F & int(std::floor(phiDifference));  // greatest integer <= x
 
         // Initialize the new cluster
-        ap_uint<36> spare = 0;
+        ap_uint<20> spare = 0;
         if (temp_iEta_signed < 0)
           spare = 4;  // 3rd bit encode PosEta
         ap_uint<12> pf_et = (ap_uint<12>)(pfIn.clusterEt() / p2eg::ECAL_LSB);
