@@ -6,7 +6,6 @@ fragment = cms.ProcessFragment("HLT")
 fragment.load("Configuration/StandardSequences/Accelerators_cff")
 fragment.load("CalibMuon/CSCCalibration/CSCChannelMapper_cfi")
 fragment.load("CalibMuon/CSCCalibration/CSCIndexer_cfi")
-fragment.load("RecoHGCal/TICL/tracksterSelectionTf_cfi")
 fragment.load("RecoJets/Configuration/CaloTowersES_cfi")
 fragment.load("RecoLocalCalo/EcalRecAlgos/EcalSeverityLevelESProducer_cfi")
 fragment.load("RecoLocalCalo/HcalRecAlgos/hcalRecAlgoESProd_cfi")
@@ -95,8 +94,18 @@ fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/trackdnn_source_cfi"
 
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltESPPixelCPEFastParams_cfi")
 
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltLSTGeometry_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltESPModulesDevLST_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltESPTTRHBuilderWithoutRefit_cfi")
+
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltMTDCPEESProducer_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltMTDTimeCalibESProducer_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltMTDTransientTrackingRecHitBuilder_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltPropagatorWithMaterialForMTD_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltKFFitterForRefitInsideOut_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltSmartPropagatorAnyRK_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltChi2EstimatorForRefit_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/eventsetup/hltKFSmootherForRefitInsideOut_cfi")
 
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/HLT_AK4PFPuppiJet520_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/HLT_Diphoton30_23_IsoCaloId_L1Seeded_cfi")
@@ -135,6 +144,9 @@ fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Ele5_Open_L1Seeded_cfi
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_Ele5_Open_Unseeded_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_JME_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/paths/MC_TRK_cfi")
+
+fragment.load("HLTrigger/Configuration/HLT_75e33/paths/DQM_TRKHeterogeneousValidation_cfi")
+fragment.load("HLTrigger/Configuration/HLT_75e33/paths/DQM_HGCALHeterogeneousValidation_cfi")
 
 fragment.load("HLTrigger/Configuration/HLT_75e33/psets/ClusterShapeTrajectoryFilter_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/psets/HGCAL_chargeCollectionEfficiencies_cfi")
@@ -264,7 +276,6 @@ fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTPfClusterRefsForJe
 fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTRawToDigiSequence_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTTiclLayerTileSequence_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTTiclPFSequence_cfi")
-fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTTiclTracksterMergeSequence_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTTiclTrackstersCLUE3DHighStepSequence_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/sequences/HLTVertexRecoSequence_cfi")
 fragment.load("HLTrigger/Configuration/HLT_75e33/services/DQMStore_cfi")
@@ -288,7 +299,6 @@ fragment.schedule = cms.Schedule(*[
     fragment.HLT_Mu37_Mu27_FromL1TkMuon,
     fragment.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_FromL1TkMuon,
     fragment.HLT_TriMu_10_5_5_DZ_FromL1TkMuon,
-
 
     fragment.HLT_Ele32_WPTight_Unseeded,
     fragment.HLT_Ele26_WP70_Unseeded,
@@ -318,7 +328,11 @@ fragment.schedule = cms.Schedule(*[
     fragment.MC_TRK,
     fragment.MC_Ele5_Open_Unseeded,
     fragment.MC_Ele5_Open_L1Seeded,
-
+    
+    # Paths for CPU vs. GPU validation
+    fragment.DQM_TRKHeterogeneousValidation,
+    fragment.DQM_HGCALHeterogeneousValidation,
+    
     fragment.HLTriggerFinalPath,
     fragment.HLTAnalyzerEndpath,
 ])

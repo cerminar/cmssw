@@ -20,8 +20,8 @@ tpToHltGeneralTrackAssociation = tpToHLTpixelTrackAssociation.clone(
 )
 
 hltTiclSimTracksters = _simTrackstersProducer.clone(
-    layerClusterCaloParticleAssociator = cms.InputTag("hltLayerClusterCaloParticleAssociationProducer"),
-    layerClusterSimClusterAssociator = cms.InputTag("hltLayerClusterSimClusterAssociationProducer"),
+    layerClusterCaloParticleAssociator = cms.InputTag("hltHGCalLayerClusterCaloParticleAssociation"),
+    layerClusterSimClusterAssociator = cms.InputTag("hltHGCalLayerClusterSimClusterAssociation"),
     filtered_mask = cms.InputTag("hltFilteredLayerClustersSimTracksters","hltTiclSimTracksters"),
     layer_clusters = cms.InputTag("hltMergeLayerClusters"),
     time_layerclusters = cms.InputTag("hltMergeLayerClusters","timeLayerCluster"),
@@ -29,7 +29,7 @@ hltTiclSimTracksters = _simTrackstersProducer.clone(
     recoTracks = cms.InputTag("hltGeneralTracks"),
     simclusters = cms.InputTag("mix","MergedCaloTruth"),
     tpToTrack = cms.InputTag("tpToHltGeneralTrackAssociation"),
-    computeLocalTime = cms.bool(False)
+    computeLocalTime = cms.bool(True)
 )
 
 from Validation.Configuration.hltHGCalSimValid_cff import *

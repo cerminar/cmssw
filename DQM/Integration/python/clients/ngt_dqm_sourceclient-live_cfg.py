@@ -15,7 +15,7 @@ if 'unitTest=True' in sys.argv:
 if unitTest:
   process.load("DQM.Integration.config.unitteststreamerinputsource_cfi")
   from DQM.Integration.config.unitteststreamerinputsource_cfi import options
-  process.source.streamLabel = 'streamDQMOnlineScouting' # in test mode use DQMOnlineScouting streamer
+  process.source.streamLabel = "streamDQMTestDataScouting"
 else:
   # for live online DQM in P5
   process.load("DQM.Integration.config.inputsource_cfi")
@@ -34,8 +34,14 @@ else:
 
 process.load("DQM.Integration.config.environment_cfi")
 
-process.dqmEnv.subSystemFolder = 'NGT'
-process.dqmSaver.tag = 'NGT'
+tag = 'NGT'
+if not unitTest:
+    if hasattr(options, 'clientTag') and options.clientTag:
+        tag = options.clientTag
+
+process.dqmEnv.subSystemFolder = tag
+process.dqmSaver.tag = tag
+
 process.dqmSaver.runNumber = options.runNumber
 # process.dqmSaverPB.tag = 'NGT'
 # process.dqmSaverPB.runNumber = options.runNumber
@@ -54,6 +60,12 @@ from RecoVertex.BeamSpotProducer.BeamSpotOnline_cfi import onlineBeamSpotProduce
 process.hltOnlineBeamSpot = _onlineBeamSpotProducer.clone()
 
 ### for pp collisions
+process.load("DQM.HLTEvF.ScoutingTrackingMonitor_cff")
+process.ScoutingTrackMonitorOnline.topFolderName = 'NGT/ScoutingOnline/Tracks'
+process.ScoutingRecoTrackMonitorOnline.FolderName = 'NGT/ScoutingOnline/Tracks'
+process.ScoutingRecoTrackMonitorOnline.BSFolderName = 'NGT/ScoutingOnline/Tracks'
+process.ScoutingRecoTrackMonitorOnline.PVFolderName = 'NGT/ScoutingOnline/Tracks'
+
 process.load("DQM.HLTEvF.ScoutingCollectionMonitor_cfi")
 process.scoutingCollectionMonitor.topfoldername = "NGT/ScoutingOnline/ScoutingCollections"
 process.scoutingCollectionMonitor.onlyScouting = False
@@ -62,6 +74,9 @@ process.scoutingCollectionMonitor.rho = ["hltScoutingPFPacker", "rho"]
 
 process.load("DQM.HLTEvF.ScoutingDileptonMonitor_cfi")
 process.ScoutingDileptonMonitorOnline.OutputInternalPath = "NGT/ScoutingOnline/DiLepton"
+
+process.load("DQM.HLTEvF.ScoutingDiMuonVertexMonitor_cfi")
+process.ScoutingDiMuonVertexMonitorOnline.FolderName = "NGT/ScoutingOnline/DiMuon"
 
 process.load("DQM.HLTEvF.ScoutingPi0Monitor_cfi")
 process.ScoutingPi0MonitorOnline.OutputInternalPath = "NGT/ScoutingOnline/PiZero"
@@ -85,13 +100,37 @@ process.ScoutingHBHERechitAnalyzerOnline.topFolderName = 'NGT/ScoutingOnline/HBH
 process.dqmcommon = cms.Sequence(process.dqmEnv
                                * process.dqmSaver)#*process.dqmSaverPB)
 
+## best electron track producer
+from PhysicsTools.Scouting.Run3ScoutingElectronBestTrackProducer_cfi import Run3ScoutingElectronBestTrackProducer as _Run3ScoutingElectronBestTrackProducer
+process.run3ScoutingElectronBestTrack =  _Run3ScoutingElectronBestTrackProducer.clone()
+
+# Metadata monitoring
+process.load("DQMOffline.Trigger.dqmHLTFiltersDQMonitor_cfi")
+process.dqmHLTFiltersDQMonitor.triggerEvent = 'hltTriggerSummaryAOD::HLT'
+process.dqmHLTFiltersDQMonitor.triggerResults = 'TriggerResults::HLT'
+process.dqmHLTFiltersDQMonitor.folderName = "NGT/Filters"
+process.dqmHLTFiltersDQMonitor.lightMonitor = True
+
+# Object Monitoring
+process.load("DQM.HLTEvF.FourVectorHLT_cfi")
+process.hltResults.topFolderName = cms.untracked.string("NGT/FourVectorHLT")
+
+process.load("DQM.HLTEvF.HLTObjectMonitor_cfi")
+process.hltObjectMonitor.topFolderName = cms.untracked.string("NGT/ObjectMonitor")
+
 process.p = cms.Path(process.dqmcommon *
                      process.hltOnlineBeamSpot *
+                     process.ScoutingTracksMonitoring *
+                     process.run3ScoutingElectronBestTrack *
                      process.scoutingCollectionMonitor *
                      process.ScoutingRecHitsMonitoring *
                      process.ScoutingDileptonMonitorOnline *
+                     process.ScoutingDiMuonVertexMonitorOnline *
                      process.ScoutingMuonPropertiesMonitorOnline *
-                     process.ScoutingPi0MonitorOnline)
+                     process.ScoutingPi0MonitorOnline *
+                     process.hltResults *
+                     process.hltObjectMonitor *
+                     process.dqmHLTFiltersDQMonitor)
 
 ### process customizations included here
 from DQM.Integration.config.online_customizations_cfi import *

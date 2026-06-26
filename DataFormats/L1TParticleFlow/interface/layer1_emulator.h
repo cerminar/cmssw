@@ -12,16 +12,20 @@
 #include "DataFormats/L1Trigger/interface/L1CandidateFwd.h"
 
 namespace l1t {
-  class PFCandidate;
-  class SAMuon;
+  namespace io_v1 {
+    class PFCandidate;
+    class SAMuon;
+  }  // namespace io_v1
+  using PFCandidate = io_v1::PFCandidate;
+  using SAMuon = io_v1::SAMuon;
 }  // namespace l1t
 
 namespace l1ct {
 
   struct HadCaloObjEmu : public HadCaloObj {
-    const l1t::L1Candidate *src = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::L1Candidate* src = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       HadCaloObj::clear();
       src = nullptr;
@@ -29,11 +33,21 @@ namespace l1ct {
   };
 
   struct EmCaloObjEmu : public EmCaloObj {
-    const l1t::L1Candidate *src = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::L1Candidate* src = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       EmCaloObj::clear();
+      src = nullptr;
+    }
+  };
+
+  struct CommonCaloObjEmu : public CommonCaloObj {
+    const l1t::L1Candidate* src = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
+    void clear() {
+      CommonCaloObj::clear();
       src = nullptr;
     }
   };
@@ -41,9 +55,9 @@ namespace l1ct {
   struct TkObjEmu : public TkObj {
     uint16_t hwChi2;
     float simPt, simCaloEta, simCaloPhi, simVtxEta, simVtxPhi, simZ0, simD0;
-    const l1t::PFTrack *src = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::PFTrack* src = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       TkObj::clear();
       src = nullptr;
@@ -59,9 +73,9 @@ namespace l1ct {
   };
 
   struct MuObjEmu : public MuObj {
-    const l1t::SAMuon *src = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::SAMuon* src = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       MuObj::clear();
       src = nullptr;
@@ -69,12 +83,12 @@ namespace l1ct {
   };
 
   struct PFChargedObjEmu : public PFChargedObj {
-    const l1t::L1Candidate *srcCluster = nullptr;
-    const l1t::PFTrack *srcTrack = nullptr;
-    const l1t::SAMuon *srcMu = nullptr;
-    const l1t::PFCandidate *srcCand = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::L1Candidate* srcCluster = nullptr;
+    const l1t::PFTrack* srcTrack = nullptr;
+    const l1t::SAMuon* srcMu = nullptr;
+    const l1t::PFCandidate* srcCand = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       PFChargedObj::clear();
       srcCluster = nullptr;
@@ -85,10 +99,10 @@ namespace l1ct {
   };
 
   struct PFNeutralObjEmu : public PFNeutralObj {
-    const l1t::L1Candidate *srcCluster = nullptr;
-    const l1t::PFCandidate *srcCand = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::L1Candidate* srcCluster = nullptr;
+    const l1t::PFCandidate* srcCand = nullptr;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       PFNeutralObj::clear();
       srcCluster = nullptr;
@@ -107,39 +121,45 @@ namespace l1ct {
     float localEta(float globalEta) const;
     float localPhi(float globalPhi) const;
 
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
   };
 
   struct PuppiObjEmu : public PuppiObj {
-    const l1t::L1Candidate *srcCluster = nullptr;
-    const l1t::PFTrack *srcTrack = nullptr;
-    const l1t::SAMuon *srcMu = nullptr;
-    const l1t::PFCandidate *srcCand = nullptr;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    const l1t::L1Candidate* srcCluster = nullptr;
+    const l1t::PFTrack* srcTrack = nullptr;
+    const l1t::SAMuon* srcMu = nullptr;
+    const l1t::PFCandidate* srcCand = nullptr;
+
+    float AssociationScore;
+    int Association;
+
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       PuppiObj::clear();
       srcCluster = nullptr;
       srcTrack = nullptr;
       srcMu = nullptr;
       srcCand = nullptr;
+      AssociationScore = 0;
+      Association = 0;
     }
-    inline void fill(const PFRegionEmu &region, const PFChargedObjEmu &src) {
+    inline void fill(const PFRegionEmu& region, const PFChargedObjEmu& src) {
       PuppiObj::fill(region, src);
       srcCluster = src.srcCluster;
       srcTrack = src.srcTrack;
       srcMu = src.srcMu;
       srcCand = src.srcCand;
     }
-    inline void fill(const PFRegionEmu &region, const PFNeutralObjEmu &src, pt_t puppiPt, puppiWgt_t puppiWgt) {
+    inline void fill(const PFRegionEmu& region, const PFNeutralObjEmu& src, pt_t puppiPt, puppiWgt_t puppiWgt) {
       PuppiObj::fill(region, src, puppiPt, puppiWgt);
       srcCluster = src.srcCluster;
       srcTrack = nullptr;
       srcMu = nullptr;
       srcCand = src.srcCand;
     }
-    inline void fill(const PFRegionEmu &region, const HadCaloObjEmu &src, pt_t puppiPt, puppiWgt_t puppiWgt) {
+    inline void fill(const PFRegionEmu& region, const HadCaloObjEmu& src, pt_t puppiPt, puppiWgt_t puppiWgt) {
       PuppiObj::fill(region, src, puppiPt, puppiWgt);
       srcCluster = src.src;
       srcTrack = nullptr;
@@ -149,7 +169,7 @@ namespace l1ct {
   };
 
   struct EGObjEmu : public EGIsoObj {
-    const l1t::L1Candidate *srcCluster = nullptr;
+    const l1t::L1Candidate* srcCluster = nullptr;
     void clear() {
       srcCluster = nullptr;
       EGIsoObj::clear();
@@ -157,13 +177,13 @@ namespace l1ct {
   };
 
   struct EGIsoObjEmu : public EGIsoObj {
-    const l1t::L1Candidate *srcCluster;
+    const l1t::L1Candidate* srcCluster;
 
     // NOTE: we use an index to the persistable RefPtr when we reshuffle collections
     // this way we avoid complex object in the object interface which needs to be used in standalone programs
     int src_idx;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       EGIsoObj::clear();
       srcCluster = nullptr;
@@ -193,14 +213,14 @@ namespace l1ct {
   };
 
   struct EGIsoEleObjEmu : public EGIsoEleObj {
-    const l1t::L1Candidate *srcCluster = nullptr;
-    const l1t::PFTrack *srcTrack = nullptr;
+    const l1t::L1Candidate* srcCluster = nullptr;
+    const l1t::PFTrack* srcTrack = nullptr;
 
     // NOTE: we use an index to the persistable RefPtr when we reshuffle collections
     // this way we avoid complex object in the object interface which needs to be used in standalone programs
     int src_idx;
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear() {
       EGIsoEleObj::clear();
       srcCluster = nullptr;
@@ -228,8 +248,8 @@ namespace l1ct {
   };
 
   struct PVObjEmu : public PVObj {
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
   };
 
   template <typename T>
@@ -242,8 +262,8 @@ namespace l1ct {
     // convenience forwarding of some methods
     typedef typename std::vector<T>::const_iterator const_iterator;
     typedef typename std::vector<T>::iterator iterator;
-    inline const T &operator[](unsigned int i) const { return obj[i]; }
-    inline T &operator[](unsigned int i) { return obj[i]; }
+    inline const T& operator[](unsigned int i) const { return obj[i]; }
+    inline T& operator[](unsigned int i) { return obj[i]; }
     inline const_iterator begin() const { return obj.begin(); }
     inline iterator begin() { return obj.begin(); }
     inline const_iterator end() const { return obj.end(); }
@@ -257,12 +277,10 @@ namespace l1ct {
     std::vector<DetectorSector<ap_uint<96>>> track;
     DetectorSector<ap_uint<64>> muon;  // muons are global
     std::vector<DetectorSector<ap_uint<256>>> hgcalcluster;
-    std::vector<DetectorSector<ap_uint<64>>> gctHad;  // the 48 hadronic clusters from the GCT
-    std::vector<DetectorSector<ap_uint<64>>> gctEm;   // the 36 EM clusters from the GCT
-    // (The trigger towers that follow the clusters are not included in the above data)
+    std::vector<DetectorSector<ap_uint<64>>> gctcluster;  // constains both em and pf clusters
 
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear();
   };
 
@@ -272,8 +290,8 @@ namespace l1ct {
     std::vector<DetectorSector<TkObjEmu>> track;
     DetectorSector<MuObjEmu> muon;  // muons are global
 
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear();
   };
 
@@ -287,8 +305,8 @@ namespace l1ct {
     PFInputRegion() {}
     PFInputRegion(float etamin, float etamax, float phicenter, float phiwidth, float etaextra, float phiextra)
         : region(etamin, etamax, phicenter, phiwidth, etaextra, phiextra) {}
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear();
   };
 
@@ -302,8 +320,8 @@ namespace l1ct {
     std::vector<EGIsoObjEmu> egphoton;
     std::vector<EGIsoEleObjEmu> egelectron;
 
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear();
 
     // for multiplicities
@@ -321,7 +339,7 @@ namespace l1ct {
       egisoeleType = 9,
       nObjTypes = 10
     };
-    static constexpr const char *objTypeName[nObjTypes] = {
+    static constexpr const char* objTypeName[nObjTypes] = {
         "", "Charged", "Neutral", "Electron", "Muon", "ChargedHadron", "NeutralHadron", "Photon", "EGIso", "EGIsoEle"};
     unsigned int nObj(ObjType type, bool puppi) const;
   };
@@ -334,13 +352,13 @@ namespace l1ct {
     std::vector<EGIsoObjEmu> egphoton;
     std::vector<EGIsoEleObjEmu> egelectron;
 
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear();
   };
 
   struct Event {
-    enum { VERSION = 14 };
+    enum { VERSION = 15 };
     uint32_t run, lumi;
     uint64_t event;
     RawInputs raw;
@@ -353,8 +371,8 @@ namespace l1ct {
 
     Event() : run(0), lumi(0), event(0) {}
 
-    bool read(std::fstream &from);
-    bool write(std::fstream &to) const;
+    bool read(std::fstream& from);
+    bool write(std::fstream& to) const;
     void clear();
     void init(uint32_t run, uint32_t lumi, uint64_t event);
     inline l1ct::PVObjEmu pv(unsigned int ipv = 0) const {
@@ -374,7 +392,7 @@ namespace l1ct {
   };
 
   template <typename T1, typename T2>
-  void toFirmware(const std::vector<T1> &in, unsigned int NMAX, T2 out[/*NMAX*/]) {
+  void toFirmware(const std::vector<T1>& in, unsigned int NMAX, T2 out[/*NMAX*/]) {
     unsigned int n = std::min<unsigned>(in.size(), NMAX);
     for (unsigned int i = 0; i < n; ++i)
       out[i] = in[i];

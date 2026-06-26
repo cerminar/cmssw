@@ -214,7 +214,7 @@ void PatElectronTagProbeAnalyzer::dqmAnalyze(edm::Event const& iEvent,
   edm::Handle<edm::View<pat::Electron>> patEls;
   iEvent.getByToken(electronCollection_, patEls);
   if (patEls.failedToGet()) {
-    edm::LogWarning("ScoutingMonitoring") << "pat::Electron collection not found.";
+    edm::LogWarning("PatElectronTagProbeAnalyzer") << "pat::Electron collection not found.";
     return;
   }
 
@@ -222,7 +222,7 @@ void PatElectronTagProbeAnalyzer::dqmAnalyze(edm::Event const& iEvent,
   edm::Handle<std::vector<Run3ScoutingElectron>> sctEls;
   iEvent.getByToken(scoutingElectronCollection_, sctEls);
   if (sctEls.failedToGet()) {
-    edm::LogWarning("ScoutingMonitoring") << "Run3ScoutingElectron collection not found.";
+    edm::LogWarning("PatElectronTagProbeAnalyzer") << "Run3ScoutingElectron collection not found.";
     return;
   }
 
@@ -230,8 +230,8 @@ void PatElectronTagProbeAnalyzer::dqmAnalyze(edm::Event const& iEvent,
   edm::Handle<edm::ValueMap<bool>> tight_ele_id_decisions;
   iEvent.getByToken(eleIdMapTightToken_, tight_ele_id_decisions);
 
-  edm::LogInfo("ScoutingMonitoring") << "Process pat::Electrons: " << patEls->size();
-  edm::LogInfo("ScoutingMonitoring") << "Process Run3ScoutingElectrons: " << sctEls->size();
+  edm::LogInfo("PatElectronTagProbeAnalyzer") << "Process pat::Electrons: " << patEls->size();
+  edm::LogInfo("PatElectronTagProbeAnalyzer") << "Process Run3ScoutingElectrons: " << sctEls->size();
 
   // Trigger
   edm::Handle<edm::TriggerResults> triggerResults;
@@ -243,7 +243,7 @@ void PatElectronTagProbeAnalyzer::dqmAnalyze(edm::Event const& iEvent,
 
   // Trigger result
   if (triggerResults.failedToGet()) {
-    edm::LogWarning("ScoutingEGammaCollectionMonitoring") << "Trgger Results not found.";
+    edm::LogWarning("PatElectronTagProbeAnalyzer") << "Trgger Results not found.";
     return;
   }
 
@@ -352,9 +352,14 @@ void PatElectronTagProbeAnalyzer::dqmAnalyze(edm::Event const& iEvent,
     const auto pat_index = indexed_patElectrons[pat_local_index].first;
     const auto pat_el = indexed_patElectrons[pat_local_index].second;
 
-    edm::Ref<edm::View<pat::Electron>> electronRef(patEls, pat_index);
-    if (!((*tight_ele_id_decisions)[electronRef]))
+    const auto& ele = patEls->at(pat_index);
+    const auto& origRef = ele.originalObjectRef();
+
+    if (!(origRef.isNonnull() && origRef.isAvailable() && tight_ele_id_decisions->contains(origRef.id()) &&
+          (*tight_ele_id_decisions)[origRef])) {
       continue;
+    }
+
     ROOT::Math::PtEtaPhiMVector tag_pat_el(pat_el.pt(), pat_el.eta(), pat_el.phi(), pat_el.mass());
 
     // Probe electron: from pat electron
@@ -363,9 +368,14 @@ void PatElectronTagProbeAnalyzer::dqmAnalyze(edm::Event const& iEvent,
          second_pat_local_index++) {
       const auto second_pat_index = indexed_patElectrons[second_pat_local_index].first;
       const auto pat_el_second = indexed_patElectrons[second_pat_local_index].second;
-      edm::Ref<edm::View<pat::Electron>> second_electronRef(patEls, second_pat_index);
-      if (!((*tight_ele_id_decisions)[second_electronRef]))
+
+      const auto& second_ele = patEls->at(second_pat_index);
+      const auto& second_origRef = second_ele.originalObjectRef();
+      if (!(second_origRef.isNonnull() && second_origRef.isAvailable() &&
+            tight_ele_id_decisions->contains(second_origRef.id()) && (*tight_ele_id_decisions)[second_origRef])) {
         continue;
+      }
+
       second_pat_pt_order += 1;
       if (pat_index == second_pat_index)
         continue;

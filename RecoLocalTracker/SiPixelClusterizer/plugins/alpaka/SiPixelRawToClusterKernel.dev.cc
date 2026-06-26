@@ -465,11 +465,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << "decoding " << wordCounter << " digis." << std::endl;
 #endif
       constexpr int numberOfModules = TrackerTraits::numberOfModules;
-      digis_d = SiPixelDigisSoACollection(wordCounter, queue);
+      digis_d = SiPixelDigisSoACollection(queue, wordCounter);
       if (includeErrors) {
-        digiErrors_d = SiPixelDigiErrorsSoACollection(wordCounter, queue);
+        digiErrors_d = SiPixelDigiErrorsSoACollection(queue, wordCounter);
       }
-      clusters_d = SiPixelClustersSoACollection(numberOfModules, queue);
+      clusters_d = SiPixelClustersSoACollection(queue, numberOfModules);
       // protect in case of empty event....
       if (wordCounter) {
         const int threadsPerBlockOrElementsPerThread =
@@ -579,7 +579,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           const auto workDivFindClus = cms::alpakatools::make_workdiv<Acc1D>(blocks, elementsPerBlockFindClus);
 
           // allocate a transient collection for the fake pixels recovered by the digi morphing algorithm
-          auto fakes_d = SiPixelDigisSoACollection(blocks * digiMorphingConfig.maxFakesInModule, queue);
+          auto fakes_d = SiPixelDigisSoACollection(queue, blocks * digiMorphingConfig.maxFakesInModule);
 #ifdef GPU_DEBUG
           alpaka::wait(queue);
           std::cout << "FindClus kernel launch with " << blocks << " blocks of " << elementsPerBlockFindClus
@@ -624,6 +624,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto bCounter = cms::alpakatools::make_device_buffer<int32_t>(queue);
         alpaka::memset(queue, bCounter, 0);
 
+        cms::alpakatools::checkSharedMemoryPrefixScan<Acc1D>(
+            TrackerTraits::numberOfModules, blocksPrefixScan, alpaka::getDev(queue));
         alpaka::exec<Acc1D>(queue,
                             workDivPrefixScan,
                             cms::alpakatools::multiBlockPrefixScan<uint32_t>(),
@@ -669,7 +671,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       using pixelTopology::Phase2;
       nDigis = numDigis;
       constexpr int numberOfModules = pixelTopology::Phase2::numberOfModules;
-      clusters_d = SiPixelClustersSoACollection(numberOfModules, queue);
+      clusters_d = SiPixelClustersSoACollection(queue, numberOfModules);
       const auto threadsPerBlockOrElementsPerThread = 512;
       const auto blocks =
           cms::alpakatools::divide_up_by(std::max<int>(numDigis, numberOfModules), threadsPerBlockOrElementsPerThread);
@@ -697,7 +699,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       std::cout << "FindClus kernel launch with " << numberOfModules << " blocks of " << elementsPerBlockFindClus
                 << " threadsPerBlockOrElementsPerThread\n";
 #endif
-      auto unused = SiPixelDigisSoACollection(0, queue);
+      auto unused = SiPixelDigisSoACollection(queue, 0);
 
       alpaka::exec<Acc1D>(queue,
                           workDivMaxNumModules,
@@ -734,6 +736,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       auto bCounter = cms::alpakatools::make_device_buffer<int32_t>(queue);
       alpaka::memset(queue, bCounter, 0);
 
+      cms::alpakatools::checkSharedMemoryPrefixScan<Acc1D>(
+          TrackerTraits::numberOfModules, blocksPrefixScan, alpaka::getDev(queue));
       alpaka::exec<Acc1D>(queue,
                           workDivPrefixScan,
                           cms::alpakatools::multiBlockPrefixScan<uint32_t>(),
@@ -766,6 +770,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 << " > bpix2 offset: " << nModules_Clusters_h[2] << std::endl;
 #endif
     }  //
+
+    // Function to zero-initialize the clusters
+    template <typename TrackerTraits>
+    void SiPixelRawToClusterKernel<TrackerTraits>::zeroInitializePhase2Clusters(Queue &queue) {
+      constexpr int numberOfModules = pixelTopology::Phase2::numberOfModules;
+      clusters_d = SiPixelClustersSoACollection(queue, numberOfModules);
+      clusters_d->zeroInitialise(queue);
+      // set moduleStartFirstElement, moduleStartLastElement and bpix2ClusterStart on the host to zero
+      // these changes are later propagated to the device portable collection during getDigis() and getClusters()
+      nModules_Clusters_h[0] = 0;
+      nModules_Clusters_h[1] = 0;
+      nModules_Clusters_h[2] = 0;
+    }
 
     template class SiPixelRawToClusterKernel<pixelTopology::Phase1>;
     template class SiPixelRawToClusterKernel<pixelTopology::Phase2>;

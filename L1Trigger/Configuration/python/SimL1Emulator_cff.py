@@ -79,6 +79,8 @@ from L1Trigger.DTTriggerPhase2.dtTriggerPhase2PrimitiveDigis_cfi import *
 _phase2_siml1emulator.add(dtTriggerPhase2PrimitiveDigis)
 from L1Trigger.DTTriggerPhase2.dtTriggerPhase2Showers_cfi import *
 _phase2_siml1emulator.add(dtTriggerPhase2Shower)
+from L1Trigger.DTTriggerPhase2.dtTriggerPhase2PrimitivePairDigis_cfi import *
+_phase2_siml1emulator.add(dtTriggerPhase2PrimitivePairDigis)
 
 # HGCAL TP 
 # ########################################################################
@@ -105,6 +107,9 @@ _phase2_siml1emulator.add(l1tPhase2CaloPFClusterEmulator)
 
 from L1Trigger.L1CaloTrigger.l1tPhase2GCTBarrelToCorrelatorLayer1Emulator_cfi import *
 _phase2_siml1emulator.add(l1tPhase2GCTBarrelToCorrelatorLayer1Emulator)
+
+from L1Trigger.L1CaloTrigger.l1tPhase2CaloToCorrelatorTM18_cfi import *
+_phase2_siml1emulator.add(l1tPhase2CaloToCorrelatorTM18)
 
 # Barrel and EndCap CaloJet/HT/NNCaloTau
 # ########################################################################

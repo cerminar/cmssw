@@ -166,6 +166,7 @@ def customizeHLTfor49436(process):
                 MinOneOverPtError=cms.double(1.0),
                 TTRHBuilder=cms.string("hltESPTTRHBWithTrackAngle"),
                 magneticField=cms.string("ParabolicMf"),
+                beamSpot=cms.InputTag("hltOnlineBeamSpot")
             )
         )
 
@@ -197,6 +198,7 @@ def customizeHLTfor49436(process):
             seq.replace(match_module, new_module + match_module)
 
     return process
+
 
 # CMSSW version specific customizations
 def customizeHLTforCMSSW(process, menuType="GRun"):
