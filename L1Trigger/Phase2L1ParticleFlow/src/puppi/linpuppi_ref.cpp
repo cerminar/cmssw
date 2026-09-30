@@ -463,24 +463,27 @@ void l1ct::LinPuppiEmulator::linpuppi_associate_trk(const PFRegionEmu &region,
   nn_assoc_t nnvtx_score = 0;
   nn_assoc_t associationThreshold = associationThreshold_;
   AssociationObjEmu association;
+
+  if (nVtx_ > 1){
+	dbgPrintf("Only 1 primary vertex is currently supported, PUPPI will use the 1st vertex in the collection");
+  }
+
   for (unsigned int it = 0; it < nTrack; ++it) {
-    for (unsigned int v = 0; v < nVtx_; ++v) {
-      if (useMLAssociation_) {
+    if (useMLAssociation_) {
 #ifdef CMSSW_GIT_HASH
-        nnVtxAssoc_->TTTrackNetworkSelector(region, trk[it], pv[v], nnvtx_score);
-        associationThreshold = nnVtxAssoc_->getAssociationThreshold();
+      nnVtxAssoc_->TTTrackNetworkSelector(region, trk[it], pv[0], nnvtx_score);
+      associationThreshold = nnVtxAssoc_->getAssociationThreshold();
 #else
-        EmuNetworkSelector(trk[it], pv[v], nnvtx_score);
+      EmuNetworkSelector(trk[it], pv[0], nnvtx_score);
 #endif
-      } else {
-        nnvtx_score =
-            (std::abs(int(trk[it].hwZ0) - int(pv[v].hwZ0)) <= int(dzCut_)) ? nn_assoc_t(1.0) : nn_assoc_t(0.0);
-      }
+    } else {
+      nnvtx_score =
+          (std::abs(int(trk[it].hwZ0) - int(pv[0].hwZ0)) <= int(dzCut_)) ? nn_assoc_t(1.0) : nn_assoc_t(0.0);
+    }
 
       association.hwAssociationScore = nnvtx_score;
       association.hwAssociation = (nnvtx_score > associationThreshold) ? 1 : 0;
       Associations.push_back(association);
-    }
   }
 }
 
