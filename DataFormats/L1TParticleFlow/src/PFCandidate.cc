@@ -13,7 +13,7 @@ l1t::PFCandidate::PFCandidate(
       hwTkQuality_(0),
       hwPuppiWeight_(0),
       hwEmID_(0),
-      encodedPuppi64_(0){
+      encodedPuppi64_(0) {
   setCharge(charge);
   setPdgIdFromParticleType(charge, kind);
 }
